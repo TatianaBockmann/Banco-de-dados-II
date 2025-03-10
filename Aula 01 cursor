@@ -1,0 +1,108 @@
+--  Tabelas para o exercício de cursor;
+create table cliente (cod_cli number(10), nome varchar2(100) , vlr_renda number (12,2),
+    constraint cli_pk primary key (cod_cli));
+
+insert into cliente (cod_cli, nome, vlr_renda) values (1, 'Joana', 200);
+insert into cliente (cod_cli, nome, vlr_renda) values (2, 'Pedro', 300);
+insert into cliente (cod_cli, nome, vlr_renda) values (3, 'Josefa', 400);
+insert into cliente (cod_cli, nome, vlr_renda) values (4, 'Marga', 500);
+insert into cliente (cod_cli, nome, vlr_renda) values (5, 'Otília', 100);
+insert into cliente (cod_cli, nome, vlr_renda) values (6, 'Genoveva', 20);
+
+create table pedido
+(cod_pedido number(10), cod_cli number(10), vlr_pedido number(12,2), dt_pedido date,
+    constraint ped_pk primary key (cod_pedido), constraint cli_ped_pk foreign key (cod_cli) references cliente(cod_cli));
+
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(1,1,100, to_date('01/12/2021','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(2,1,200, to_date('10/12/2021','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(3,2,1000, to_date('01/10/2022','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(4,1,100, to_date('15/01/2023','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(4,1,3500, to_date('01/12/2021','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(5,5,2900, to_date('01/07/2021','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(6,5,3100, to_date('01/12/2021','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(7,4,1500, to_date('10/02/2020','dd/mm/rrrr'));
+insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
+(8,4,3100, to_date('26/08/2021','dd/mm/rrrr'));
+
+--Exercício 1. Listar o nome de todos os clientes:
+Declare 
+Cursor C_cliente is
+select cliente.nome
+from cliente;
+R_cliente C_cliente%rowtype;
+
+Begin
+Open C_cliente;
+loop
+Fetch C_cliente into R_cliente;
+exit when C_cliente%notfound;
+dbms_output.put_line(R_cliente.nome);
+end loop;
+close C_cliente;
+end;
+
+--Exercício 2. Altere o exercício 1 e mostre além do nome do cliente, o código do pedido e valor do pedido do cliente:
+declare
+cursor c_cliente_pedido is
+select cliente.nome, pedido.cod_pedido, pedido.vlr_pedido
+from cliente, pedido
+where cliente.cod_cli = pedido.cod_cli
+order by cliente.nome, pedido.cod_pedido, pedido.vlr_pedido;
+r_cliente_pedido c_cliente_pedido%ROWTYPE;
+
+begin
+open c_cliente_pedido;
+loop
+fetch c_cliente_pedido into r_cliente_pedido;
+exit when c_cliente_pedido%NOTFOUND;
+DBMS_OUTPUT.PUT_LINE(r_cliente_pedido.nome ||' '|| r_cliente_pedido.cod_pedido ||' '|| r_cliente_pedido.vlr_pedido);
+end loop;
+close c_cliente_pedido;
+end;
+
+--Exercício 3. Altere o exercício 2, mostre o valor total dos pedidos por cliente(sum(pedido.vlr_pedido) Total o cursor exige apelido quando usa sum, arg, max e etc.)
+declare
+cursor c_cliente_pedido is
+select cliente.nome, sum(pedido.vlr_pedido) total
+from cliente, pedido
+where cliente.cod_cli = pedido.cod_cli
+    group by cliente.nome;
+r_cliente_pedido c_cliente_pedido%ROWTYPE;
+
+begin
+open c_cliente_pedido;
+loop
+fetch c_cliente_pedido into r_cliente_pedido;
+exit when c_cliente_pedido%NOTFOUND;
+DBMS_OUTPUT.PUT_LINE(r_cliente_pedido.nome ||' '|| r_cliente_pedido.total);
+end loop;
+close c_cliente_pedido;
+end;
+
+--Exercícico 4. Altere o exercício 3 e mostre apenas os clientes com a soma dos pedidos superior a 5.000,00:
+declare
+cursor c_cliente_pedido is
+select cliente.nome, sum(pedido.vlr_pedido) total
+from cliente, pedido
+where cliente.cod_cli = pedido.cod_cli
+group by cliente.nome
+having sum(pedido.vlr_pedido)>5000;
+r_cliente_pedido c_cliente_pedido%ROWTYPE;
+
+begin
+open c_cliente_pedido;
+loop
+fetch c_cliente_pedido into r_cliente_pedido;
+exit when c_cliente_pedido%NOTFOUND;
+DBMS_OUTPUT.PUT_LINE(r_cliente_pedido.nome ||' '|| r_cliente_pedido.total);
+end loop;
+close c_cliente_pedido;
+end;

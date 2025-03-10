@@ -1,0 +1,22 @@
+Resumo
+
+Cursor
+Usando %ROWTYPE com cursores (PL/SQL)
+Atualizado pela última vez: 2025-01-14
+O atributo %ROWTYPE é usado para definir um registro com campos correspondentes a todas as colunas que são buscadas a partir de uma variável de cursor ou cursor. Cada campo assume o tipo de dado de sua coluna correspondente.
+
+
+Fetch em SQL
+•	O comando FETCH é uma instrução SQL que permite recuperar um número limitado de resultados por vez. 
+•	É uma ferramenta importante para lidar com grandes conjuntos de dados. 
+•	O FETCH permite navegar sequencialmente por registros paginados. 
+•	O FETCH, juntamente com o OFFSET, é usado para paginar uma consulta no SQL Server. 
+•	O OFFSET indica quantas linhas devem ser ignoradas no início do conjunto de resultados. 
+•	O FETCH indica o número máximo de linhas que devem ser retornadas após o OFFSET. 
+Fetch como instrução de programação
+•	Em programação, fetch é uma instrução em assembly que carrega o registo de instrução da CPU. 
+•	Na instrução FETCH, um cursor é posicionado em uma linha de uma tabela de resultados. 
+•	A instrução FETCH pode retornar zero ou um e designa os valores das linhas para hospedar variáveis. 
+
+
+

@@ -78,7 +78,7 @@ end;
 
 
 
-
+CURSOR ENCADEADO
 
 
 Drop table cidade cascade constraints;

@@ -68,7 +68,8 @@ end loop;
 close c_cliente_pedido;
 end;
 
---Exercício 3. Altere o exercício 2, mostre o valor total dos pedidos por cliente(sum(pedido.vlr_pedido) Total o cursor exige apelido quando usa sum, arg, max e etc.)
+--Exercício 3. Altere o exercício 2, mostre o valor total dos pedidos por cliente(sum(pedido.vlr_pedido) Total o cursor 
+exige apelido quando usa sum, arg, max e etc.)
 declare
 cursor c_cliente_pedido is
 select cliente.nome, sum(pedido.vlr_pedido) total

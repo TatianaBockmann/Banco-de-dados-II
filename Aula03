@@ -1,0 +1,140 @@
+CREATE TABLE Cidade (
+  Cod_Cidade INTEGER   NOT NULL ,
+  Nome_Cidade VARCHAR(40)   NOT NULL ,
+  UF VARCHAR(2)    ,
+  País VARCHAR(75)   NOT NULL   ,
+PRIMARY KEY(Cod_Cidade));
+
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAÍS) values ('1','Campo Bom','RS','Brasil');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAÍS) values ('2','São Leopoldo','RS','Brasil');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAÍS) values ('3','São Paulo','SP','Brasil');
+
+
+Create or replace function fn_cidade
+(P_cod_cidade in Number)  
+Return Varchar2  
+IS  
+        Cursor C_A IS  
+                 SELECT cidade.nome_cidade
+    FROM cidade
+    WHERE cidade.COD_CIDADE =P_cod_cidade;
+ 
+R_A C_A%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_A;
+        FETCH C_A INTO R_A;  
+		if c_a%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_A;  
+
+Return ( R_A.nome_cidade );
+END;
+
+
+select FN_CIDADE(10) from dual;            
+
+CREATE TABLE PESSOA (
+  id_PESSOA NUMERIC(10)   NOT NULL ,
+  Cod_Cidade INTEGER   NOT NULL ,
+  CGC_CPF VARCHAR(10)   NOT NULL ,
+  NOME VARCHAR(150)   NOT NULL ,
+  ENDERECO VARCHAR(120)    ,
+  BAIRRO VARCHAR(50)    ,
+  CEP VARCHAR(12)    ,
+  PESSOA_FIS_JUR VARCHAR(1)    ,
+PRIMARY KEY(id_PESSOA)  ,
+  FOREIGN KEY(Cod_Cidade)
+    REFERENCES Cidade(Cod_Cidade));
+
+Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA_FIS_JUR) values ('1','1','888888','João Da Silva','Nova Santana',null,'9999999','F');
+Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA_FIS_JUR) values ('2','1','111111','Maria de Lourdes','Nova Brentano',null,'9999999','J');
+Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA_FIS_JUR) values ('3','2','222222','João Augusto da Luz','Maralto',null,'7777777','F');
+Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA_FIS_JUR) values ('4','2','2234567','Aquatema da Silva','Nova Hartz',null,'66666666','F');
+Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA_FIS_JUR) values ('5','3','55555555','São Paulo','São Bernardo',null,'55555555','F');
+
+Create or replace function fn_cod
+(P_cod in Number)  
+Return Varchar2  
+IS  
+        Cursor C_A IS  
+    SELECT pessoa.nome, cidade.nome_cidade
+    FROM cidade, pessoa
+    WHERE pessoa.COD_CIDADE = cidade.COD_CIDADE
+    and pessoa.id_pessoa = P_cod;
+ 
+R_A C_A%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_A;
+        FETCH C_A INTO R_A;  
+		if c_a%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_A;  
+
+Return ( R_A.nome_cidade ||' '|| R_A.nome );
+END;
+
+
+select FN_cod(3) from dual; 
+
+--1) Faça uma função que retorna quantas pessoas estão cadstradas
+
+Create or replace function fn_qtidadepessoa
+Return Number  
+IS  
+
+Cursor C_qtidadepessoa IS  
+    
+    SELECT count(pessoa.id_pessoa) qtidade
+    FROM pessoa;
+       
+ 
+R_qtidadepessoa C_qtidadepessoa%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_qtidadepessoa;
+        FETCH C_qtidadepessoa INTO R_qtidadepessoa;  
+		if c_qtidadepessoa%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_qtidadepessoa;  
+
+Return (R_qtidadepessoa.qtidade);
+END;
+
+
+select FN_qtidadepessoa() from dual; 
+
+--2) Faça uma função que mostre o nome da cidade e quantas pessoas estão cadstradas nesta cidade. Passe como parâmetro o código da cidade.
+
+Create or replace function fn_codcidade
+(P_cod_cidade in Number)  
+Return Varchar2  
+IS  
+    Cursor C_codcidade IS  
+    SELECT cidade.nome_cidade, count(pessoa.id_pessoa) qtidade
+    FROM cidade, pessoa
+    WHERE pessoa.COD_CIDADE = cidade.COD_CIDADE
+    and pessoa.id_pessoa = P_cod_cidade
+    group by cidade.nome_cidade;
+       
+ 
+R_codcidade C_codcidade%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_codcidade;
+        FETCH C_codcidade INTO R_codcidade;  
+		if c_codcidade%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_codcidade;  
+
+Return ( R_codcidade.nome_cidade ||' '|| R_codcidade.qtidade );
+    
+END;
+
+
+select FN_codcidade(1) from dual; 
+--ou
+select cod_cidade, fn_codcidade(cod_cidade) from cidade where Cod_cidade in (2,3);
+--ou
+select cod_cidade, fn_codcidade(cod_cidade) from cidade;

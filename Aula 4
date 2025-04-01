@@ -1,0 +1,26 @@
+Create or replace function fn_cod_departamento
+(P_cod_departamento in Number)  
+Return Varchar2  
+IS  
+    Cursor C_cod_departamento IS  
+    SELECT departamento.cod_departamento, count(funcionario.cod_funcionario) qtidade
+    FROM departamento, funcionario
+    WHERE funcionario.cod_departamento = departamento.cod_departamento
+    and funcionario.cod_funcionario = P_cod_departamento
+    group by departamento.cod_departamento;
+       
+ 
+R_cod_departamento C_cod_departamento%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_cod_departamento;
+        FETCH C_cod_departamento INTO R_cod_departamento;  
+		if c_cod_departamento%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_cod_departamento;  
+
+Return ( R_cod_departamento.cod_departamento ||' '|| R_cod_funcionario.qtidade );
+    
+END;
+
+select cod_departamento, fn_cod_departamento(cod_departamento) from departamento;

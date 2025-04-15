@@ -112,3 +112,55 @@ BEGIN
 
 select*from departamento;
 
+--2. Faça uma procedure que retorne o número de cidades cadastradas:
+
+CREATE TABLE Cidade (
+  Cod_Cidade INTEGER   NOT NULL ,
+  Nome_Cidade VARCHAR(40)   NOT NULL ,
+  UF VARCHAR(2)    ,
+  País VARCHAR(75)   NOT NULL   ,
+PRIMARY KEY(Cod_Cidade));
+
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAÍS) values ('1','Campo Bom','RS','Brasil');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAÍS) values ('2','São Leopoldo','RS','Brasil');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAÍS) values ('3','São Paulo','SP','Brasil');
+
+create or replace procedure prc_cidade ( p_conta out number)
+IS 
+BEGIN
+select count(*)  into p_conta from cidade;
+end;
+
+BEGIN
+    DECLARE
+        v_conta number(4);
+    BEGIN
+        prc_cidade(v_conta);
+        dbms_output.put_line(v_conta);
+    end;end;
+
+
+--3. Faça uma procedure que retorna o nome da cidade, a UF e o país. Passe como parâmeytro o código da cidade:
+
+create or replace procedure prc_cidade
+(p_cod_cidade IN number, p_nome_cidade out varchar2, p_uf out varchar2, 
+p_pais out VARCHAR2)
+IS 
+BEGIN
+select nome_cidade, uf, país into p_nome_cidade, p_uf, p_pais
+from CIDADE
+where cidade.COD_cidade = p_cod_cidade;
+end;
+
+
+BEGIN
+    DECLARE
+        v_cod_cidade number(4);
+        v_nome_cidade varchar2(100);
+        v_uf varchar2(2);
+        v_pais varchar2(100);
+    BEGIN
+        prc_cidade(2, v_nome_cidade, v_uf, v_pais);
+        dbms_output.put_line(v_nome_cidade||'-'||v_uf||'-'||v_pais);
+    end;end;
+  

@@ -1,0 +1,111 @@
+create table Produto
+(IdProduto Number(5),
+Descricao Varchar2(100),
+ValorProduto Number(12,2),
+ProdAtivoInativo Varchar2(1),
+Constraint PRODUTO_PK
+Primary key(IdProduto));
+
+insert into Produto values(1,'Máquina de lavar', 2560, 'a');
+insert into Produto values(2,'mangueira', 200, 'i');
+insert into Produto values(3,'Guarda-Roupas', 1800, 'a');
+insert into Produto values(4,'Roda', 560, 'i');
+insert into Produto values(5,'Pneu', 236, 'i');
+insert into Produto values(6,'Soquete', 12, 'a');
+insert into Produto values(7,'Chave seta', 98, 'a');
+insert into Produto values(8,'Chave de boca', 19, 'i');
+insert into Produto values(9,'Alicate', 36, 'a');
+insert into Produto values(10,'Tesoura', 15, 'a');
+
+--1. Faça uma função que retorna a descrição do produto. Passe o IdProduto como parâmetro.
+
+Create or replace function fn_desc_prod
+(Param_cod_produto in Number)  
+Return Varchar2  
+IS  
+    Cursor C_desc_prod IS  
+    SELECT produto.Descricao
+    FROM produto
+    WHERE produto.IdProduto = Param_cod_produto;
+ 
+R_desc_prod C_desc_prod%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_desc_prod;
+        FETCH C_desc_prod INTO R_desc_prod;  
+		if c_desc_prod%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_desc_prod;  
+
+Return ( R_desc_prod.Descricao );
+END;
+
+SELECT fn_desc_prod(*) FROM dual; --item 2
+
+SELECT fn_desc_prod(idproduto) FROM produto; -- todos os itens
+
+
+
+-- 2.Faça uma função que retorne a quantidade de produtos ativos
+Create or replace function fn_quant_prod
+--(Param_quant_produto in Number)  
+Return Number 
+IS  
+    Cursor C_quant_prod IS  
+    SELECT COUNT(produto.IdProduto) quantidade
+    FROM Produto
+    WHERE Produto.ProdAtivoInativo = 'a';
+ 
+R_quant_prod C_quant_prod%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_quant_prod;
+        FETCH C_quant_prod INTO R_quant_prod;  
+		if C_quant_prod%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_quant_prod;  
+
+Return (R_quant_prod.quantidade);
+END;
+
+SELECT fn_quant_prod() FROM dual; 
+
+--3. Faça uma função que mostre o produto de maior valor:
+Create or replace function fn_maiorValor
+--(Param_quant_produto in Number)  
+Return Number 
+IS  
+    Cursor C_maiorValor IS  
+    SELECT MAX(produto.ValorProduto) valorMaior
+    FROM Produto;    
+ 
+R_maiorValor C_maiorValor%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_maiorValor;
+        FETCH C_maiorValor INTO R_maiorValor;  
+		if C_maiorValor%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_maiorValor;  
+
+Return (R_maiorValor.valorMaior);
+END;
+
+SELECT fn_maiorValor() FROM dual; 
+
+--4.  Faça uma procedure que ative ou inative um produto. Passe como parâmetro o IdProduto.
+
+create or replace procedure prc_ativarInativar
+	(
+    param_IdProduto IN number,
+    param_AtivoInativo IN varchar2
+ 	)
+IS 
+	BEGIN
+	UPDATE Produto set  ProdAtivoInativo = param_AtivoInativo
+	where Produto.IdProduto = param_IdProduto;
+	END;
+
+    exec prc_ativarInativar(1, 'i');
+	exec prc_ativarInativar(8, 'a')
+select*from Produto;

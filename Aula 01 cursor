@@ -35,7 +35,7 @@ insert into pedido (cod_pedido, cod_cli, vlr_pedido, dt_pedido) values
 --Exercício 1. Listar o nome de todos os clientes:
 Declare 
 Cursor C_cliente is
-select cliente.nome
+select nome
 from cliente;
 R_cliente C_cliente%rowtype;
 

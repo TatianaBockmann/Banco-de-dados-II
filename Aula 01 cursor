@@ -1,3 +1,6 @@
+
+24.02.25
+
 --  Tabelas para o exercício de cursor;
 create table cliente (cod_cli number(10), nome varchar2(100) , vlr_renda number (12,2),
     constraint cli_pk primary key (cod_cli));

@@ -1,3 +1,6 @@
+
+17.03.25
+
 CREATE TABLE PESSOA
     (
     id_pessoa integer,

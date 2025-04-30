@@ -60,10 +60,10 @@ end;
 --2. Alterar o exercício 1, mostrar a pessoa, o curso, e o valor da mensalidade 
 declare
 cursor c_Pessoa_Curso_Mensalidade is
-select Pessoa.nome, Curso.nome NomeCurso, Mensalidade.valor
+select Pessoa.nome, Curso.nomeCurso, Mensalidade.valor
 from Pessoa, Curso, Mensalidade
 where Pessoa.Id_Pessoa = Mensalidade.Id_Pessoa and Curso.Id_curso = Mensalidade.Id_curso;
-order by Pessoa.nome, NomeCurso, Mensalidade.valor;
+order by Pessoa.nome, Curso.nomeCurso, Mensalidade.valor;
 r_Pessoa_Curso_Mensalidade c_Pessoa_Curso_Mensalidade%ROWTYPE;
 
 Begin
@@ -292,7 +292,8 @@ Begin
 	close C_Estoque;
 end;
 
---Exercício 4. Alterar o exercício 3, adicionando um cursor encadeado mostrando o idproduto, qtide de estoque da tabela linhas, conforme o código do estoque(idestoque)
+--Exercício 4. Alterar o exercício 3, adicionando um cursor encadeado mostrando o idproduto, qtide de estoque da tabela linhas, 
+conforme o código do estoque(idestoque)
 
 DECLARE
    CURSOR c_estoque is

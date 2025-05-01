@@ -1,3 +1,6 @@
+
+14.04.25
+
 create table empresa
 (cod_empresa number(3) not null,
 nome_empresa varchar2 (150) not null,
@@ -140,7 +143,7 @@ BEGIN
     end;end;
 
 
---3. Faça uma procedure que retorna o nome da cidade, a UF e o país. Passe como parâmeytro o código da cidade:
+--3. Faça uma procedure que retorna o nome da cidade, a UF e o país. Passe como parâmetro o código da cidade:
 
 create or replace procedure prc_cidade
 (p_cod_cidade IN number, p_nome_cidade out varchar2, p_uf out varchar2, 
@@ -164,3 +167,4 @@ BEGIN
         dbms_output.put_line(v_nome_cidade||'-'||v_uf||'-'||v_pais);
     end;end;
   
+--4. Altere a procedure do exercício 3, mostre também quantas pessoas estão cadastradas na cidade selecionada.

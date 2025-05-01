@@ -1,3 +1,6 @@
+
+24.03.25
+
 CREATE TABLE Cidade (
   Cod_Cidade INTEGER   NOT NULL ,
   Nome_Cidade VARCHAR(40)   NOT NULL ,

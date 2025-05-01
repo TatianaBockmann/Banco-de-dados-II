@@ -14,18 +14,18 @@ Create or replace function fn_cidade
 (P_cod_cidade in Number)  
 Return Varchar2  
 IS  
-        Cursor C_A IS  
-                 SELECT cidade.nome_cidade
-    FROM cidade
-    WHERE cidade.COD_CIDADE =P_cod_cidade;
+    Cursor C_A IS  
+	SELECT cidade.nome_cidade
+    	FROM cidade
+    	WHERE cidade.COD_CIDADE =P_cod_cidade;
  
 R_A C_A%ROWTYPE;  
  
 BEGIN  
 OPEN C_A;
         FETCH C_A INTO R_A;  
-		if c_a%notfound THEN return('não encontrou');
-		end if;
+	if c_a%notfound THEN return('não encontrou');
+	end if;
 CLOSE C_A;  
 
 Return ( R_A.nome_cidade );
@@ -34,6 +34,7 @@ END;
 
 select FN_CIDADE(10) from dual;            
 
+--1. Crie a tabela pessoa, insira alguns registros:
 CREATE TABLE PESSOA (
   id_PESSOA NUMERIC(10)   NOT NULL ,
   Cod_Cidade INTEGER   NOT NULL ,
@@ -53,6 +54,8 @@ Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA
 Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA_FIS_JUR) values ('4','2','2234567','Aquatema da Silva','Nova Hartz',null,'66666666','F');
 Insert into PESSOA (ID_PESSOA,COD_CIDADE,CGC_CPF,NOME,ENDERECO,BAIRRO,CEP,PESSOA_FIS_JUR) values ('5','3','55555555','São Paulo','São Bernardo',null,'55555555','F');
 
+--1. Crie uma função que retorna o nome da pessoa e o nome da cidade. Passe como parâmetro o código da pessoa:
+
 Create or replace function fn_cod
 (P_cod in Number)  
 Return Varchar2  
@@ -68,8 +71,8 @@ R_A C_A%ROWTYPE;
 BEGIN  
 OPEN C_A;
         FETCH C_A INTO R_A;  
-		if c_a%notfound THEN return('não encontrou');
-		end if;
+	if c_a%notfound THEN return('não encontrou');
+	end if;
 CLOSE C_A;  
 
 Return ( R_A.nome_cidade ||' '|| R_A.nome );
@@ -78,7 +81,7 @@ END;
 
 select FN_cod(3) from dual; 
 
---1) Faça uma função que retorna quantas pessoas estão cadstradas
+--2. Faça uma função que retorna quantas pessoas estão cadstradas
 
 Create or replace function fn_qtidadepessoa
 Return Number  
@@ -105,7 +108,8 @@ END;
 
 select FN_qtidadepessoa() from dual; 
 
---2) Faça uma função que mostre o nome da cidade e quantas pessoas estão cadstradas nesta cidade. Passe como parâmetro o código da cidade.
+--3. Faça uma função que mostre o nome da cidade e quantas pessoas estão cadstradas nesta cidade. Passe como parâmetro o código
+da cidade.
 
 Create or replace function fn_codcidade
 (P_cod_cidade in Number)  

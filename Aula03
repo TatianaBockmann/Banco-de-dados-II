@@ -35,7 +35,7 @@ Return ( R_A.nome_cidade );
 END;
 
 
-select FN_CIDADE(10) from dual;            
+select FN_CIDADE(1) from dual;            
 
 --1. Crie a tabela pessoa, insira alguns registros:
 CREATE TABLE PESSOA (
@@ -63,7 +63,7 @@ Create or replace function fn_cod
 (P_cod in Number)  
 Return Varchar2  
 IS  
-        Cursor C_A IS  
+    Cursor C_A IS  
     SELECT pessoa.nome, cidade.nome_cidade
     FROM cidade, pessoa
     WHERE pessoa.COD_CIDADE = cidade.COD_CIDADE
@@ -84,15 +84,15 @@ END;
 
 select FN_cod(3) from dual; 
 
---2. Faça uma função que retorna quantas pessoas estão cadstradas
+
+--2. Faça uma função que retorna quantas pessoas estão cadstradas na tabela pessoa
 
 Create or replace function fn_qtidadepessoa
 Return Number  
 IS  
 
-Cursor C_qtidadepessoa IS  
-    
-    SELECT count(pessoa.id_pessoa) qtidade
+    Cursor C_qtidadepessoa IS  
+    SELECT count(pessoa.id_pessoa) qtidade  //Raul: SELECT count(*) quantidade
     FROM pessoa;
        
  
@@ -101,17 +101,17 @@ R_qtidadepessoa C_qtidadepessoa%ROWTYPE;
 BEGIN  
 OPEN C_qtidadepessoa;
         FETCH C_qtidadepessoa INTO R_qtidadepessoa;  
-		if c_qtidadepessoa%notfound THEN return('não encontrou');
-		end if;
+	if c_qtidadepessoa%notfound THEN return('não encontrou');
+	end if;
 CLOSE C_qtidadepessoa;  
 
 Return (R_qtidadepessoa.qtidade);
 END;
 
 
-select FN_qtidadepessoa() from dual; 
+select FN_qtidadepessoa() from dual; // Raul: select FN_qtidadepessoa from dual;
 
---3. Faça uma função que mostre o nome da cidade e quantas pessoas estão cadstradas nesta cidade. Passe como parâmetro o código
+--3. Faça uma função que mostre o nome da cidade e quantas pessoas estão cadastradas nesta cidade. Passe como parâmetro o código
 da cidade.
 
 Create or replace function fn_codcidade
@@ -119,10 +119,10 @@ Create or replace function fn_codcidade
 Return Varchar2  
 IS  
     Cursor C_codcidade IS  
-    SELECT cidade.nome_cidade, count(pessoa.id_pessoa) qtidade
+    SELECT cidade.nome_cidade, count(pessoa.id_pessoa) qtidade //Raul: SELECT cidade.nome_cidade, count(*) qtidade
     FROM cidade, pessoa
-    WHERE pessoa.COD_CIDADE = cidade.COD_CIDADE
-    and pessoa.id_pessoa = P_cod_cidade
+    WHERE cidade.COD_CIDADE =  pessoa.COD_CIDADE 
+    and pessoa.id_pessoa = P_cod_cidade  // Raul: and cidade.COD_CIDADE = P_cod_cidade
     group by cidade.nome_cidade;
        
  
@@ -131,11 +131,11 @@ R_codcidade C_codcidade%ROWTYPE;
 BEGIN  
 OPEN C_codcidade;
         FETCH C_codcidade INTO R_codcidade;  
-		if c_codcidade%notfound THEN return('não encontrou');
-		end if;
+	if c_codcidade%notfound THEN return('não encontrou');
+	end if;
 CLOSE C_codcidade;  
 
-Return ( R_codcidade.nome_cidade ||' '|| R_codcidade.qtidade );
+Return ( R_codcidade.nome_cidade ||' '|| R_codcidade.qtidade ); // Raul: Return ( R_codcidade.nome_cidade ||', quantidade de pessoas: '|| R_qtidade );
     
 END;
 
@@ -144,4 +144,4 @@ select FN_codcidade(1) from dual;
 --ou
 select cod_cidade, fn_codcidade(cod_cidade) from cidade where Cod_cidade in (2,3);
 --ou
-select cod_cidade, fn_codcidade(cod_cidade) from cidade;
+select cod_cidade, fn_codcidade(cod_cidade) from cidade; // Raul

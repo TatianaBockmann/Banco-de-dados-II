@@ -1,5 +1,3 @@
-
-
 create table Produto
 (IdProduto Number(5),
 Descricao Varchar2(100),
@@ -262,7 +260,7 @@ IS
     v_maiorValorOrc NUMBER;
 BEGIN  
     -- Seleciona o maior valor de orçamento
-    SELECT MAX(ValorOrcamento)
+    SELECT MAX(ValorOrcamento) 
     INTO v_maiorValorOrc
     FROM Orcamento;
 
@@ -283,7 +281,7 @@ BEGIN
  
 
     -- Retorna o nome do produto
-    RETURN v_descricao;
+    RETURN (v_descricao);
 
 --EXCEPTION
  --   WHEN NO_DATA_FOUND THEN
@@ -295,7 +293,111 @@ END fn_produtoMaiorOrcamento;
 
 SELECT fn_produtoMaiorOrcamento() AS DescricaoProdutoMaiorOrcamento FROM dual;
 
+--9.1 Faça uma função que retorne o produto com o maior orçamento.Esse com cursor
+
+CREATE OR REPLACE FUNCTION maiorOrcamento
+RETURN VARCHAR2
+IS
+    v_nomeProduto VARCHAR2(100);
+    v_maiorValor NUMBER;
+
+    CURSOR c_maiorOrcamento IS
+        SELECT IdProduto, ValorOrcamento
+        FROM Orcamento
+        WHERE ValorOrcamento = (SELECT MAX(ValorOrcamento) FROM Orcamento);
+
+    v_idProduto NUMBER;
+
+BEGIN
+    OPEN c_maiorOrcamento;
+    FETCH c_maiorOrcamento INTO v_idProduto, v_maiorValor;
+
+    IF c_maiorOrcamento%NOTFOUND THEN
+        CLOSE c_maiorOrcamento;
+        RETURN 'Nenhum orçamento encontrado'; -- Mensagem se não houver orçamentos
+    END IF;
+
+    -- Busca o nome do produto associado ao IdProduto encontrado
+    SELECT Descricao
+    INTO v_nomeProduto
+    FROM Produto
+    WHERE IdProduto = v_idProduto;
+
+    CLOSE c_maiorOrcamento;
+    RETURN v_nomeProduto; -- Retorna o nome do produto associado ao maior orçamento
+
+--EXCEPTION
+    --WHEN NO_DATA_FOUND THEN
+    --    RETURN 'Nenhum produto encontrado'; -- Mensagem se não houver produtos correspondentes
+   -- WHEN OTHERS THEN
+     --   RETURN 'Erro ao buscar produto'; -- Mensagem em caso de erro geral
+END maiorOrcamento;
+    
+SELECT maiorOrcamento() AS NomeProdutoMaiorOrcamento FROM dual;
+
+--9.2. Faça uma função que retorne o produto com o maior orçamento.
+
+CREATE OR REPLACE FUNCTION fn_maiorOrcamento
+RETURN VARCHAR2
+IS
+    v_descricao VARCHAR2(100);
+    v_maiorValor NUMBER;
+    v_idProduto NUMBER;
+BEGIN
+    -- Busca o maior valor do orçamento
+    SELECT MAX(ValorOrcamento) INTO v_maiorValor
+    FROM Orcamento;
+
+    -- Verifica se foi encontrado algum orçamento
+    --IF v_maiorValor IS NULL THEN
+       -- RETURN 'Nenhum orçamento encontrado';
+    --END IF;
+
+    -- Busca o IdProduto correspondente ao maior orçamento
+    SELECT IdProduto INTO v_idProduto
+    FROM Orcamento
+    WHERE ValorOrcamento = v_maiorValor;
+
+    -- Busca a descrição do produto
+    SELECT Descricao INTO v_descricao
+    FROM Produto
+    WHERE IdProduto = v_idProduto;
+
+    RETURN v_descricao;
+--EXCEPTION
+    --WHEN NO_DATA_FOUND THEN
+    --    RETURN 'Nenhum produto encontrado';
+    --WHEN OTHERS THEN
+    --    RETURN 'Erro ao buscar produto';
+END fn_maiorOrcamento;
+
+SELECT fn_maiorOrcamento() AS produtomaiororcamento from dual;
 
 --10. Faça uma procedeure que retorna o nome do produto. Passe como parâmetro o código do produto.
 
+CREATE OR REPLACE PROCEDURE prc_obter_nome_produto (
+    param_idProduto IN NUMBER,
+    param_nomeProduto OUT VARCHAR2
+) IS
+BEGIN
+    -- Busca o nome do produto pelo ID
+    SELECT Descricao INTO param_nomeProduto
+    FROM Produto
+    WHERE IdProduto = param_idProduto;
+
+--EXCEPTION
+  --  WHEN NO_DATA_FOUND THEN
+    --    p_nomeProduto := 'Produto não encontrado';
+    --WHEN OTHERS THEN
+    --    p_nomeProduto := 'Erro ao buscar produto';
+END prc_obter_nome_produto;
+
+
+--Executar a procedure
+DECLARE
+    v_nomeProduto VARCHAR2(100);
+BEGIN
+    prc_obter_nome_produto(1, v_nomeProduto); -- substitua 1 pelo código do produto desejado
+    DBMS_OUTPUT.PUT_LINE('Nome do Produto: ' || v_nomeProduto);
+END;
 

@@ -1,0 +1,194 @@
+CREATE TABLE CIDADE
+   (    COD_CIDADE NUMBER(5,0),
+    NOME_CIDADE VARCHAR2(100 BYTE),
+    UF VARCHAR2(2 BYTE),
+    PAIS VARCHAR2(100 BYTE),
+     CONSTRAINT CIDADE_PK PRIMARY KEY (COD_CIDADE)
+   ) ;
+
+Insert into cidade values (1, 'Novo Hamburgo', 'RS', 'Brasil');
+Insert into cidade values (2, 'Campo Bom', 'RS', 'Brasil');
+Insert into cidade values (3, 'Estância Velha', 'RS', 'Brasil');
+Insert into cidade values (4, 'Florianópolis', 'SC', 'Brasil');
+Insert into cidade values (5, 'São Paulo', 'SP', 'Brasil');
+Insert into cidade values (6, 'Campinas', 'SP', 'Brasil');
+Insert into cidade values (7, 'Nova York', null, 'EUA');
+
+CREATE TABLE PESSOA
+   (    COD_PESSOA NUMBER(7,0),
+    NOME VARCHAR2(100 BYTE),
+    DATA_NASC DATE,
+    ENDERECO VARCHAR2(100 BYTE),
+    COD_CIDADE NUMBER(5,0),
+    ENDERECO_ENTREGA VARCHAR2(100 BYTE),
+    COD_CIDADE_ENTREGA NUMBER(5,0),
+    DATA_CADSATRO DATE,
+     CONSTRAINT PESSOA_PK PRIMARY KEY (COD_PESSOA),
+   CONSTRAINT PESSOA_CIDADE_FK FOREIGN KEY (COD_CIDADE)       REFERENCES CIDADE (COD_CIDADE) ENABLE,
+     CONSTRAINT PESSOA_CIDADE_ENTREGA_FK FOREIGN KEY (COD_CIDADE_ENTREGA)       REFERENCES CIDADE (COD_CIDADE)
+   ) ;
+
+insert into pessoa values (1, 'Pedro', to_date('01/01/2015','dd/mm/rrrr'), 'xx', 1, 'xx', 2, sysdate);
+insert into pessoa values (2, 'Maria', to_date('01/01/2014','dd/mm/rrrr'), 'xx', 2, 'xx', 2, sysdate);
+
+insert into pessoa values (3, 'Jonas', to_date('01/01/2016','dd/mm/rrrr'), 'xx', 1, 'xx', 3, sysdate);
+
+
+insert into pessoa values (4, 'Artur', to_date('01/10/2015','dd/mm/rrrr'), 'xx', 1, 'xx', 1, sysdate);
+
+
+insert into pessoa values (5, 'Amanda', to_date('20/01/2013','dd/mm/rrrr'), 'xx', 6, 'xx', 6, sysdate);
+
+insert into pessoa values (6, 'Zeca', to_date('01/08/2016','dd/mm/rrrr'), 'xx', 5, 'xx', 2, sysdate);
+
+CREATE TABLE ORCAMENTO
+   (    COD_ORCAMENTO NUMBER(10,0),
+    DATA_ORCAMENTO DATE,
+    VALOR_ORCAMENTO NUMBER(12,2),
+    COD_PESSOA NUMBER(7,0),
+    DATA_VALIDADE_ORCAMENTO DATE,
+     CONSTRAINT ORCAMENTO_PK PRIMARY KEY (COD_ORCAMENTO),
+   CONSTRAINT ORCAMENTO_PESSOA_FK FOREIGN KEY (COD_PESSOA) REFERENCES PESSOA (COD_PESSOA)
+   );
+
+insert into orcamento values (1, to_date('20/10/2021','dd/mm/rrrr'), 230, 1, to_date('20/10/2021','dd/mm/rrrr')+10);
+
+insert into orcamento values (2, to_date('20/11/2021','dd/mm/rrrr'), 430, 3, to_date('20/11/2021','dd/mm/rrrr')+10);
+
+insert into orcamento values (3, to_date('12/09/2021','dd/mm/rrrr'),1230, 2, to_date('12/09/2021','dd/mm/rrrr')+10);
+
+insert into orcamento values (4, to_date('18/07/2021','dd/mm/rrrr'), 30, 1, to_date('18/07/2021','dd/mm/rrrr')+10);
+
+insert into orcamento values (5, to_date('20/03/2022','dd/mm/rrrr'), 130, 5, to_date('20/03/2022','dd/mm/rrrr')+10);
+
+
+
+--1) Faça uma função que retorna o nome da pessoa e a cidade da pessoa. Passe o código da pessoa. Use cursor.
+
+create or replace function fn_nome_cidade
+    (Param_cod_pessoa in Number)  
+Return Varchar2  
+IS  
+        Cursor C_A IS  
+                 SELECT pessoa.nome, cidade.nome_cidade 
+       			 FROM pessoa, cidade
+        		 WHERE cidade.cod_cidade = pessoa.cod_cidade
+        		 AND pessoa.cod_pessoa = Param_cod_pessoa;
+   
+R_A C_A%ROWTYPE;  
+
+BEGIN  
+OPEN C_A;
+        FETCH C_A INTO R_A;  
+CLOSE C_A;  
+
+Return ( R_A.NOME||' '||R_A.nome_cidade);
+END;
+
+select fn_nome_cidade(2) from dual;
+
+--2) Faça uma função que retorne o nome da pessoa e a quantidade de orçamentos dessa pessoa. Passe o código da pessoa. Use cursor.
+
+CREATE OR REPLACE FUNCTION fn_pessoa_qtdorcamentos (
+    Param_cod_pessoa IN NUMBER
+) RETURN VARCHAR2
+IS
+    CURSOR C_A IS
+        SELECT pessoa.nome, COUNT(orcamento.cod_orcamento) AS qtidade
+        FROM pessoa, orcamento
+        WHERE pessoa.cod_pessoa = orcamento.cod_pessoa
+        AND pessoa.cod_pessoa = Param_cod_pessoa
+        GROUP BY pessoa.nome;
+
+    R_A C_A%ROWTYPE;
+
+BEGIN
+    OPEN C_A;
+    FETCH C_A INTO R_A;
+
+    IF C_A%NOTFOUND THEN
+        CLOSE C_A;
+        RETURN 'não encontrou';
+    END IF;
+
+    CLOSE C_A;
+
+    RETURN R_A.nome || ' ' || R_A.qtidade;
+
+END;
+
+select fn_pessoa_qtdorcamentos(2) from dual;
+
+--3) Faça uma função que conte quantas pessoa possuem a cidade de moradia  (cod_cidade) diferente da cidade de entrega (cod_cidade_entrega).
+CREATE OR REPLACE FUNCTION fn_moradia_entrega
+RETURN NUMBER
+IS
+    v_qtde NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_qtde
+    FROM pessoa
+    WHERE cod_cidade <> cod_cidade_entrega;
+
+    RETURN v_qtde;
+END;
+select fn_moradia_entrega from dual;
+
+
+--4) Faça uma procedure para inserir um novo orçamento.
+CREATE OR REPLACE PROCEDURE prc_insere_orcamento (
+    p_cod_orcamento IN NUMBER,
+    p_data_orcamento DATE,
+    p_valor_orcamento IN NUMBER,  
+    p_cod_pessoa IN NUMBER,
+    p_data_validade_orcamento DATE) 
+    IS
+BEGIN
+    INSERT INTO ORCAMENTO (
+        COD_ORCAMENTO,
+        DATA_ORCAMENTO,
+        VALOR_ORCAMENTO,
+        COD_PESSOA,
+        DATA_VALIDADE_ORCAMENTO
+    )
+    VALUES (
+        p_cod_orcamento,
+        p_data_orcamento,
+        p_valor_orcamento,
+        p_cod_pessoa,
+        p_data_validade_orcamento
+    );
+
+END prc_insere_orcamento;
+
+exec prc_insere_orcamento(6, to_date('05/05/2025','dd/mm/rrrr'), 450, 2, to_date('07/05/2025','dd/mm/rrrr')+10);
+
+SELECT*FROM orcamento;
+
+
+--5) faça uma procedure para deletar uma pessoa. Lembre que para deletar uma pessoa é necessário deletar os orçamentos dessa pessoa antes.
+CREATE OR REPLACE PROCEDURE prc_deletar_orcamento (
+    p_cod_orcamento IN NUMBER  
+) IS
+BEGIN
+    
+    DELETE FROM orcamento
+    WHERE cod_orcamento = p_cod_orcamento;
+
+END prc_deletar_orcamento ;
+
+EXEC prc_deletar_orcamento(2);
+SELECT * FROM orcamento;
+
+CREATE OR REPLACE PROCEDURE prc_deletar_pessoa (
+    p_cod_pessoa IN NUMBER  
+) IS
+BEGIN
+    
+    DELETE FROM PESSOA
+    WHERE COD_PESSOA = p_cod_pessoa;
+
+END prc_deletar_pessoa;
+
+EXEC prc_deletar_pessoa(3);
+SELECT * FROM pessoa;
+

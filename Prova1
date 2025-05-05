@@ -1,0 +1,204 @@
+
+
+create table Produto
+(IdProduto Number(5),
+Descricao Varchar2(100),
+ValorProduto Number(12,2),
+ProdAtivoInativo Varchar2(1),
+Constraint PRODUTO_PK
+Primary key(IdProduto));
+
+insert into Produto values(1,'Máquina de lavar', 2560, 'a');
+insert into Produto values(2,'mangueira', 200, 'i');
+insert into Produto values(3,'Guarda-Roupas', 1800, 'a');
+insert into Produto values(4,'Roda', 560, 'i');
+insert into Produto values(5,'Pneu', 236, 'i');
+insert into Produto values(6,'Soquete', 12, 'a');
+insert into Produto values(7,'Chave seta', 98, 'a');
+insert into Produto values(8,'Chave de boca', 19, 'i');
+insert into Produto values(9,'Alicate', 36, 'a');
+insert into Produto values(10,'Tesoura', 15, 'a');
+
+--1. Faça uma função que retorna a descrição do produto. Passe o IdProduto como parâmetro.
+
+Create or replace function fn_desc_prod
+(Param_cod_produto in Number)  
+Return Varchar2  
+IS  
+    Cursor C_desc_prod IS  
+    SELECT produto.Descricao
+    FROM produto
+    WHERE produto.IdProduto = Param_cod_produto;
+ 
+R_desc_prod C_desc_prod%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_desc_prod;
+        FETCH C_desc_prod INTO R_desc_prod;  
+		if c_desc_prod%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_desc_prod;  
+
+Return ( R_desc_prod.Descricao );
+END;
+
+SELECT fn_desc_prod(*) FROM dual; --item 2
+
+SELECT fn_desc_prod(idproduto) FROM produto; -- todos os itens
+
+-- 2.Faça uma função que retorne a quantidade de produtos ativos
+Create or replace function fn_quant_prod
+--(Param_quant_produto in Number)  
+Return Number 
+IS  
+    Cursor C_quant_prod IS  
+    SELECT COUNT(produto.IdProduto) quantidade
+    FROM Produto
+    WHERE Produto.ProdAtivoInativo = 'a';
+ 
+R_quant_prod C_quant_prod%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_quant_prod;
+        FETCH C_quant_prod INTO R_quant_prod;  
+		if C_quant_prod%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_quant_prod;  
+
+Return (R_quant_prod.quantidade);
+END;
+
+SELECT fn_quant_prod() FROM dual; 
+
+--3. Faça uma função que mostre o produto de maior valor:
+Create or replace function fn_maiorValor
+--(Param_quant_produto in Number)  
+Return Number 
+IS  
+    Cursor C_maiorValor IS  
+    SELECT MAX(produto.ValorProduto) valorMaior
+    FROM Produto;    
+ 
+R_maiorValor C_maiorValor%ROWTYPE;  
+ 
+BEGIN  
+OPEN C_maiorValor;
+        FETCH C_maiorValor INTO R_maiorValor;  
+		if C_maiorValor%notfound THEN return('não encontrou');
+		end if;
+CLOSE C_maiorValor;  
+
+Return (R_maiorValor.valorMaior);
+END;
+
+SELECT fn_maiorValor() FROM dual; 
+
+--4.  Faça uma procedure que ative ou inative um produto. Passe como parâmetro o IdProduto.
+
+create or replace procedure prc_ativarInativar
+	(
+    param_IdProduto IN number,
+    param_AtivoInativo IN varchar2
+ 	)
+IS 
+	BEGIN
+	UPDATE Produto set  ProdAtivoInativo = param_AtivoInativo
+	where Produto.IdProduto = param_IdProduto;
+	END;
+
+    exec prc_ativarInativar(1, 'a');
+	exec prc_ativarInativar(8, 'i')
+select*from Produto;
+
+--5 Faça uma procedure que aumente em 10% o valor de um determinado produto. Passe como parâmetro o IdProduto.
+
+CREATE OR REPLACE PROCEDURE prc_aum10(param_IdProduto IN NUMBER)
+IS 
+BEGIN
+    UPDATE Produto 
+    SET valorProduto = valorProduto + valorProduto * 10 / 100
+    WHERE IdProduto = param_IdProduto;
+END;
+
+EXEC prc_aum10(3);
+select*from Produto;
+
+--6 Altere a procedure da questão 5, o usuário deve informar o percentual de aumento entre 10 e 100%.
+
+CREATE OR REPLACE PROCEDURE prc_aum_percentual(
+    param_IdProduto IN NUMBER,
+    param_Percentual IN NUMBER
+)
+IS 
+BEGIN
+    -- Verificar se o percentual está entre 10 e 100
+    --IF param_Percentual < 10 OR param_Percentual > 100 THEN
+    --    RAISE_APPLICATION_ERROR(-20001, 'O percentual deve estar entre 10 e 100.');
+    --END IF;
+    
+    UPDATE Produto 
+    SET valorProduto = valorProduto + valorProduto * param_Percentual / 100
+    WHERE IdProduto = param_IdProduto;
+END;
+
+-- Para executar a procedure com um percentual de aumento, por exemplo 15%:
+EXEC prc_aum_percentual(3, 15);
+
+--7. Faça uma procedure que delete os produtos. Passe como parâmetro o IdProduto.
+CREATE OR REPLACE PROCEDURE prc_deletaproduto(
+    param_prod IN NUMBER,
+    param_del OUT NUMBER
+)
+IS 
+BEGIN
+    -- Contar o número de produtos com o IdProduto especificado
+    SELECT COUNT(1) INTO param_del 
+    FROM Produto 
+    WHERE IdProduto = param_prod;
+
+    -- Se existir pelo menos um produto, deletar
+    IF param_del > 0 THEN
+        DELETE FROM Produto 
+        WHERE IdProduto = param_prod;
+
+        -- Retornar o número de produtos deletados
+        --param_del := 1; -- Assumindo que se deletou apenas um produto
+    --ELSE
+     --   param_del := 0; -- Nenhum produto encontrado para deletar
+    END IF;
+END;
+
+
+-- Bloco para executar a procedure e exibir o resultado
+DECLARE
+    v_del NUMBER(4) := -1;
+BEGIN
+    -- Chamar a procedure para deletar o produto com IdProduto igual a 4
+    prc_deletaproduto(4, v_del);
+    
+    -- Exibir o número de produtos deletados
+    DBMS_OUTPUT.PUT_LINE('Produtos deletados: ' || v_del);
+END;
+
+
+CREATE TABLE Orcamento (
+    IdOrcamento NUMBER(5),
+    DescricaoOrcamento VARCHAR2(100),
+    ValorOrcamento NUMBER(12,2),
+    IdProduto NUMBER(5),  -- Adicionada definição para IdProduto
+    CONSTRAINT ORCAMENTO_PK PRIMARY KEY (IdOrcamento),
+    CONSTRAINT Orcamento_Produto_fk FOREIGN KEY (IdProduto) REFERENCES Produto(IdProduto)
+);
+
+insert into Orcamento values(1,'Máquina de lavar', 2560);
+insert into Orcamento values(2,'mangueira', 200);
+insert into Orcamento values(3,'Guarda-Roupas', 1800);
+insert into Orcamento values(4,'Roda', 560);
+insert into Orcamento values(5,'Pneu', 236);
+insert into Orcamento values(6,'Soquete', 12);
+insert into Orcamento values(7,'Chave seta', 98);
+insert into Orcamento values(8,'Chave de boca', 19);
+insert into Orcamento values(9,'Alicate', 36);
+insert into Orcamento values(10,'Tesoura', 15);
+
+--8. Faça uma função que retorna a descrição do orçamento, o valor do orçamento e a descrição do produto. Use cursor.

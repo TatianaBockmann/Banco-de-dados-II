@@ -188,16 +188,16 @@ CREATE TABLE Orcamento (
     CONSTRAINT Orcamento_Produto_fk FOREIGN KEY (IdProduto) REFERENCES Produto(IdProduto));
 
 
-insert into Orcamento values(1,'Máquina de lavar', 2560, 10);
-insert into Orcamento values(2,'mangueira', 200, 2, 9);
-insert into Orcamento values(3,'Guarda-Roupas', 1800, 8);
-insert into Orcamento values(4,'Roda', 560, 7);
-insert into Orcamento values(5,'Pneu', 236, 6);
-insert into Orcamento values(6,'Soquete', 12, 5);
-insert into Orcamento values(7,'Chave seta', 98, 4);
-insert into Orcamento values(8,'Chave de boca', 19, 3);
-insert into Orcamento values(9,'Alicate', 36, 2);
-insert into Orcamento values(10,'Tesoura', 15, 1);
+insert into Orcamento values(1,'Orcamento1', 2560, 1);
+insert into Orcamento values(2,'Orcamento2', 200, 2, 2);
+insert into Orcamento values(3,'Orcamento3', 1800, 3);
+insert into Orcamento values(4,'Orcamento4', 560, 4);
+insert into Orcamento values(5,'Orcamento5', 236, 5);
+insert into Orcamento values(6,'Orcamento6', 12, 6);
+insert into Orcamento values(7,'Orcamento7', 98, 7);
+insert into Orcamento values(8,'Orcamento8', 19, 8);
+insert into Orcamento values(9,'Orcamento9', 36, 9);
+insert into Orcamento values(10,'Orcamento10', 15, 10);
 
 --8. Faça uma função que retorna a descrição do orçamento, o valor do orçamento e a descrição do produto. Use cursor.
 
@@ -400,7 +400,6 @@ BEGIN
     prc_obter_nome_produto(1, v_nomeProduto); -- substitua 1 pelo código do produto desejado
     DBMS_OUTPUT.PUT_LINE('Nome do Produto: ' || v_nomeProduto);
 END;
-
 
 
 

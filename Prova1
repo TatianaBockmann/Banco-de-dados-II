@@ -187,18 +187,115 @@ CREATE TABLE Orcamento (
     ValorOrcamento NUMBER(12,2),
     IdProduto NUMBER(5),  -- Adicionada definição para IdProduto
     CONSTRAINT ORCAMENTO_PK PRIMARY KEY (IdOrcamento),
-    CONSTRAINT Orcamento_Produto_fk FOREIGN KEY (IdProduto) REFERENCES Produto(IdProduto)
-);
+    CONSTRAINT Orcamento_Produto_fk FOREIGN KEY (IdProduto) REFERENCES Produto(IdProduto));
 
-insert into Orcamento values(1,'Máquina de lavar', 2560);
-insert into Orcamento values(2,'mangueira', 200);
-insert into Orcamento values(3,'Guarda-Roupas', 1800);
-insert into Orcamento values(4,'Roda', 560);
-insert into Orcamento values(5,'Pneu', 236);
-insert into Orcamento values(6,'Soquete', 12);
-insert into Orcamento values(7,'Chave seta', 98);
-insert into Orcamento values(8,'Chave de boca', 19);
-insert into Orcamento values(9,'Alicate', 36);
-insert into Orcamento values(10,'Tesoura', 15);
+
+insert into Orcamento values(1,'Máquina de lavar', 2560, 10);
+insert into Orcamento values(2,'mangueira', 200, 2, 9);
+insert into Orcamento values(3,'Guarda-Roupas', 1800, 8);
+insert into Orcamento values(4,'Roda', 560, 7);
+insert into Orcamento values(5,'Pneu', 236, 6);
+insert into Orcamento values(6,'Soquete', 12, 5);
+insert into Orcamento values(7,'Chave seta', 98, 4);
+insert into Orcamento values(8,'Chave de boca', 19, 3);
+insert into Orcamento values(9,'Alicate', 36, 2);
+insert into Orcamento values(10,'Tesoura', 15, 1);
 
 --8. Faça uma função que retorna a descrição do orçamento, o valor do orçamento e a descrição do produto. Use cursor.
+
+CREATE OR REPLACE FUNCTION fn_descOrcamento (
+    param_idOrcamento IN NUMBER,
+    param_valorOrcam OUT NUMBER,
+    param_descProduto OUT VARCHAR2
+) RETURN VARCHAR2 IS
+    CURSOR c_orcamento IS
+        SELECT Orcamento.DescricaoOrcamento, Orcamento.ValorOrcamento, Produto.Descricao
+        FROM Orcamento, Produto
+        WHERE Orcamento.IdProduto = Produto.IdProduto
+        AND Orcamento.IdOrcamento = param_idOrcamento;
+
+    v_descOrcamento Orcamento.DescricaoOrcamento%TYPE;
+    v_valorOrcamento Orcamento.ValorOrcamento%TYPE;
+    v_descProduto Produto.Descricao%TYPE;
+
+BEGIN
+    OPEN c_orcamento;
+    FETCH c_orcamento INTO v_descOrcamento, v_valorOrcamento, v_descProduto;
+
+    IF c_orcamento%FOUND THEN
+        param_valorOrcam := v_valorOrcamento;
+        param_descProduto := v_descProduto;
+        RETURN v_descOrcamento; -- Retorna a descrição do orçamento
+    ELSE
+        RETURN 'Orçamento não encontrado';
+    END IF;
+
+    CLOSE c_orcamento;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        CLOSE c_orcamento;
+        RETURN SQLERRM;
+END fn_descOrcamento;
+
+DECLARE
+    v_valorOrcam NUMBER;
+    v_descProduto VARCHAR2(100);
+    v_descOrcamento VARCHAR2(100);
+    v_idOrcamento NUMBER := 1; -- Altere para o ID do orçamento desejado
+BEGIN
+    -- Chama a função passando o ID do orçamento
+    v_descOrcamento := fn_descOrcamento(v_idOrcamento, v_valorOrcam, v_descProduto);
+
+    -- Exibe os resultados
+    DBMS_OUTPUT.PUT_LINE('Descrição do Orçamento: ' || v_descOrcamento);
+    DBMS_OUTPUT.PUT_LINE('Valor do Orçamento: ' || v_valorOrcam);
+    DBMS_OUTPUT.PUT_LINE('Descrição do Produto: ' || v_descProduto);
+    
+END;
+
+--9. Faça uma função que retorne o produto com o maior orçamento.
+CREATE OR REPLACE FUNCTION fn_produtoMaiorOrcamento
+RETURN VARCHAR2 
+IS  
+    v_descricao VARCHAR2(100);
+    v_maiorValorOrc NUMBER;
+BEGIN  
+    -- Seleciona o maior valor de orçamento
+    SELECT MAX(ValorOrcamento)
+    INTO v_maiorValorOrc
+    FROM Orcamento;
+
+    -- Verifica se não encontrou orçamentos
+    --IF v_maiorValorOrc IS NULL THEN
+      --  RETURN 'Nenhum orçamento encontrado'; -- Retorna mensagem se não houver orçamentos
+    --END IF;
+
+    -- Seleciona o nome do produto que corresponde ao maior orçamento
+    SELECT Descricao
+    INTO v_descricao
+    FROM Produto 
+    WHERE IdProduto = (
+        SELECT IdProduto 
+        FROM Orcamento 
+        WHERE ValorOrcamento = v_maiorValorOrc);
+        --AND ROWNUM = 1  -- Limita a um produto caso haja mais de um com o mesmo orçamento
+ 
+
+    -- Retorna o nome do produto
+    RETURN v_descricao;
+
+--EXCEPTION
+ --   WHEN NO_DATA_FOUND THEN
+     --   RETURN 'Nenhum produto encontrado'; -- Retorna mensagem se não houver produtos
+   -- WHEN OTHERS THEN
+   --     RETURN 'Erro ao buscar produto'; -- Retorna mensagem em caso de erro
+END fn_produtoMaiorOrcamento;
+
+
+SELECT fn_produtoMaiorOrcamento() AS DescricaoProdutoMaiorOrcamento FROM dual;
+
+
+--10. Faça uma procedeure que retorna o nome do produto. Passe como parâmetro o código do produto.
+
+

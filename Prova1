@@ -177,7 +177,19 @@ BEGIN
     -- Exibir o número de produtos deletados
     DBMS_OUTPUT.PUT_LINE('Produtos deletados: ' || v_del);
 END;
+-- 7.1 Bruna) Faça uma procedure que delete os produtos. Passe como parâmetro o idProduto
 
+create or replace procedure deletaProdutos
+(
+    param_IdProduto in number
+)
+is
+begin
+delete from Produto where IdProduto = param_IdProduto;
+end;
+
+exec deletaProdutos(4);
+select * from Produto;
 
 CREATE TABLE Orcamento (
     IdOrcamento NUMBER(5),

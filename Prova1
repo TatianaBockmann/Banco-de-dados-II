@@ -401,3 +401,42 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Nome do Produto: ' || v_nomeProduto);
 END;
 
+
+
+
+9.3 Bruna    CREATE OR REPLACE FUNCTION fn_maiorOrcamento
+RETURN VARCHAR2
+IS
+    v_descricao VARCHAR2(100);
+    v_maiorValor NUMBER;
+    v_idProduto NUMBER;
+BEGIN
+    -- Busca o maior valor do orçamento
+    SELECT MAX(ValorOrcamento) INTO v_maiorValor
+    FROM Orcamento;
+
+    -- Verifica se foi encontrado algum orçamento
+    --IF v_maiorValor IS NULL THEN
+       -- RETURN 'Nenhum orçamento encontrado';
+    --END IF;
+
+    -- Busca o IdProduto correspondente ao maior orçamento
+    SELECT IdProduto INTO v_idProduto
+    FROM Orcamento
+    WHERE ValorOrcamento = v_maiorValor;
+
+    -- Busca a descrição do produto
+    SELECT Descricao INTO v_descricao
+    FROM Produto
+    WHERE IdProduto = (SELECT IdProduto FROM Orcamento WHERE ValorOrcamento = v_maiorValor);
+
+    RETURN v_descricao;
+	
+--EXCEPTION
+    --WHEN NO_DATA_FOUND THEN
+    --    RETURN 'Nenhum produto encontrado';
+    --WHEN OTHERS THEN
+    --    RETURN 'Erro ao buscar produto';
+END fn_maiorOrcamento;
+
+SELECT fn_maiorOrcamento() AS produtomaiororcamento from dual;

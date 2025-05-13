@@ -94,4 +94,20 @@ Update pessoa set data_cadastro = to_date('01/01/2014''DD/MM/RRRR')
 WHERE ID_PESSOA = 2;
 
 
+CREATE TABLE LOGUI
+   (MENSAGEM VARCHAR2(100),
+    USUARIO VARCHAR2(50),
+    DATA_MOV DATE,
+    TP_MOV VARCHAR2(1));
+
+--Usando a tabela salário, copie todas as operações DML para a tabela logui
+create or replace trigger trg_salario
+before insert or update or delete on salario 
+for each row
+Begin
+	IF inserting then
+	Insert into logui values (:New.COD_Funcionario ||'-'||New.valor.salario, user, sysdate, 'I');
+	END IF;
+END;
+
 

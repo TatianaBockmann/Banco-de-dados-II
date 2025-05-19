@@ -1,0 +1,97 @@
+CREATE TABLE FUNCIONARIO
+( COD_FUNCIONARIO NUMBER(5,0),
+NOME_FUNCIONARIO VARCHAR2(100),
+constraint funcionario_pk primary key (cod_funcionario));
+
+insert into funcionario values (1, 'Joao da Silva Sauro');
+insert into funcionario values (2, 'Maria da Luz Cardoso');
+insert into funcionario values (3, 'Joao da Silva Sauro');
+insert into funcionario values (4, 'Pedro Alcântara');
+insert into funcionario values (5, 'Joao da Silva Sauro');
+insert into funcionario values (6, 'Armando Silva');
+insert into funcionario values (7, 'Joao Alves');
+
+create table salario
+( cod_funcionario number(5) not null,
+data_salario date not null,
+valor_salario number(12,2) not null,
+constraint salario_pk primary key (cod_funcionario, data_salario),
+constraint salario_func_fk foreign key (cod_funcionario) references funcionario(cod_funcionario));
+
+insert into salario values (1, to_date( '01/01/2013','dd/mm/rrrr'), 1000);
+insert into salario values (1, to_date( '01/01/2014','dd/mm/rrrr'), 2000);
+insert into salario values (1, to_date( '01/01/2015','dd/mm/rrrr'), 3000);
+
+insert into salario values (2, to_date( '01/04/2013','dd/mm/rrrr'), 1100);
+insert into salario values (2, to_date( '01/07/2014','dd/mm/rrrr'), 2200);
+insert into salario values (2, to_date( '01/01/2015','dd/mm/rrrr'), 3300);
+
+insert into salario values (3, to_date( '01/05/2013','dd/mm/rrrr'), 1200);
+insert into salario values (3, to_date( '01/08/2014','dd/mm/rrrr'), 2300);
+insert into salario values (3, to_date( '01/01/2015','dd/mm/rrrr'), 3400);
+
+CREATE TABLE LOGUI
+   (MENSAGEM VARCHAR2(100),
+    USUARIO VARCHAR2(50),
+    DATA_MOV DATE,
+    TP_MOV VARCHAR2(1));
+
+--Usando a tabela salário, copie todas as operações DML para a tabela logui
+CREATE OR REPLACE TRIGGER trg_salario
+BEFORE INSERT OR UPDATE OR DELETE ON salario
+FOR EACH ROW
+BEGIN
+-- Quando for uma inserção
+    IF INSERTING THEN
+        INSERT INTO logui 
+        VALUES (:NEW.COD_FUNCIONARIO || '-' || :NEW.VALOR_SALARIO, USER, SYSDATE, 'I');
+
+    -- Quando for uma atualização
+    ELSIF UPDATING THEN
+        INSERT INTO logui 
+        VALUES (:NEW.COD_FUNCIONARIO || '-' || :NEW.VALOR_SALARIO, USER, SYSDATE, 'U');
+
+    -- Quando for uma exclusão
+    ELSIF DELETING THEN
+        INSERT INTO logui 
+        VALUES (:OLD.COD_FUNCIONARIO || '-' || :OLD.VALOR_SALARIO, USER, SYSDATE, 'D');
+    END IF;
+END;
+
+INSERT INTO salario VALUES (5, TO_DATE('01/01/2016', 'DD/MM/YYYY'), 2500);
+
+UPDATE salario 
+SET valor_salario = 2600 
+WHERE cod_funcionario = 5 AND data_salario = TO_DATE('01/01/2016', 'DD/MM/YYYY');
+
+DELETE FROM salario 
+WHERE cod_funcionario = 5 AND data_salario = TO_DATE('01/01/2016', 'DD/MM/YYYY');
+
+select*from salario;
+select*from logui;
+
+
+
+Para que a trigger trg_salario funcione corretamente nas três operações (INSERT, UPDATE e DELETE), você precisa executar comandos 
+DML na tabela salario que acionem cada tipo de operação.
+
+Veja como fazer isso passo a passo:
+
+✅ 1. INSERÇÃO (INSERT)
+
+INSERT INTO salario VALUES (4, TO_DATE('01/01/2016', 'DD/MM/YYYY'), 2500);
+✅ 2. ATUALIZAÇÃO (UPDATE)
+
+UPDATE salario 
+SET valor_salario = 2600 
+WHERE cod_funcionario = 4 AND data_salario = TO_DATE('01/01/2016', 'DD/MM/YYYY');
+✅ 3. EXCLUSÃO (DELETE)
+
+DELETE FROM salario 
+WHERE cod_funcionario = 4 AND data_salario = TO_DATE('01/01/2016', 'DD/MM/YYYY');
+🔎 Verificar resultado na tabela logui
+Depois de executar os comandos acima, você pode verificar o que foi registrado pela trigger com:
+
+
+SELECT * FROM logui;
+Você verá registros com TP_MOV sendo 'I', 'U' e 'D' representando respectivamente Insert, Update e Delete.

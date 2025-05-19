@@ -1,4 +1,44 @@
 
+As operações DML (Data Manipulation Language – Linguagem de Manipulação de Dados) são comandos SQL usados para inserir, atualizar, 
+excluir e consultar dados dentro das tabelas de um banco de dados.
+
+✅ Principais operações DML:
+INSERT
+
+Insere novos registros (linhas) em uma tabela.
+
+Exemplo:
+
+INSERT INTO pessoa (nome, idade) VALUES ('Maria', 30);
+UPDATE
+
+Altera dados existentes em uma ou mais linhas de uma tabela.
+
+Exemplo:
+
+UPDATE pessoa SET idade = 31 WHERE nome = 'Maria';
+DELETE
+
+Remove dados (linhas) de uma tabela.
+
+Exemplo:
+
+DELETE FROM pessoa WHERE nome = 'Maria';
+SELECT (embora seja tecnicamente considerada parte do DQL - Data Query Language)
+
+Recupera dados das tabelas.
+
+Exemplo:
+
+SELECT * FROM pessoa;
+📌 Observações:
+Comandos DML modificam os dados, mas não a estrutura das tabelas (isso é papel do DDL – Data Definition Language).
+
+Após executar comandos DML em bancos como Oracle, normalmente é necessário um COMMIT (confirma) ou ROLLBACK (desfaz) para 
+finalizar ou reverter as mudanças.
+
+
+
 CREATE TABLE ORCAMENTO
    (    COD_ORCAMENTO NUMBER(10,0),
     DATA_ORCAMENTO DATE,
@@ -15,19 +55,28 @@ insert into orcamento values (5, to_date('20/03/2022','dd/mm/rrrr'), 130, 5, to_
 insert into orcamento values (6, to_date('20/03/2022','dd/mm/rrrr'), 130, 5, to_date('20/03/2022','dd/mm/rrrr')+10);
 insert into orcamento values (7, to_date('20/03/2022','dd/mm/rrrr'), 25, 5, to_date('20/03/2022','dd/mm/rrrr')+10);
 
-create or replace trigger trg_orcamento
+-- Cria ou substitui o trigger chamado trg_orcamento
+CREATE OR REPLACE TRIGGER trg_orcamento
 
-before insert or update on orcamento 
-for each ROW
-Begin
-    if :new.VALOR_ORCAMENTO < 0 THEN
-	raise_application_error(-20200, 'Não é possível inserir valor negativo');
-	end if;
-end;
+-- Define que o trigger será executado antes (BEFORE) de inserções ou atualizações na tabela orcamento
+BEFORE INSERT OR UPDATE ON orcamento
 
-update orcamento set VALOR_ORCAMENTO = -20
-where COD_ORCAMENTO = 1;
+-- O trigger será executado para cada linha afetada (não em nível de instrução)
+FOR EACH ROW
+BEGIN
+    -- Verifica se o novo valor do campo VALOR_ORCAMENTO é menor que zero
+    IF :NEW.VALOR_ORCAMENTO < 0 THEN
+        -- Se for negativo, gera um erro e cancela a operação
+        RAISE_APPLICATION_ERROR(-20200, 'Não é possível inserir valor negativo');
+    END IF;
+END;
 
+
+-- Comando que tenta atualizar a linha com COD_ORCAMENTO = 1 e atribuir valor negativo
+-- Isso irá acionar o trigger e gerar um erro, impedindo a atualização
+UPDATE orcamento
+SET VALOR_ORCAMENTO = -20
+WHERE COD_ORCAMENTO = 1;
 
 create table salario
 ( cod_salario number(5) not null,
@@ -45,13 +94,24 @@ insert into salario values (6, to_date( '01/01/2015','dd/mm/rrrr'), 3300);
 
 
 --1. Usando a tabela salário, não permita quw registros posssam ser apagados
-create or replace trigger trg_1
-before delete on salario
+-- Cria ou substitui o trigger chamado trg_1
+CREATE OR REPLACE TRIGGER trg_1
+
+-- Define que o trigger será executado antes da operação DELETE na tabela salario
+BEFORE DELETE ON salario
+
+-- Especifica que o trigger será executado para cada linha afetada (linha por linha)
 FOR EACH ROW
-Begin
-        raise_application_error(-20200, 'Não pode deletar');
-end;     
-delete from salario where COD_SALARIO = 3;
+BEGIN
+    -- Lança um erro personalizado com código -20200 e uma mensagem
+    -- Isso impede que a exclusão seja concluída
+    RAISE_APPLICATION_ERROR(-20200, 'Não pode deletar');
+END;
+/
+
+-- Tenta excluir o registro com COD_SALARIO = 3 da tabela salario
+-- Essa operação acionará o trigger acima e resultará em erro
+DELETE FROM salario WHERE COD_SALARIO = 3;
 
 CREATE TABLE PESSOA (
   Id_PESSOA NUMERIC(10)   NOT NULL ,
@@ -67,33 +127,52 @@ Insert into PESSOA (ID_PESSOA,NOME,DATA_ANIVERSARIO, DATA_CADASTRO) values ('3',
   
 
 --2. Usando a tabela pessoa, a data de nascimento deve ser maior ou igual a hoje.
-create or replace trigger trg_2
-before insert or update on pessoa 
-for each row
-Begin
-	if :new.data_aniversario < Trunc(sysdate) then
-	raise_application_error (-20100, 'data_aniversario inválida');
-	end if;
-end;
+-- Cria ou substitui o trigger chamado trg_2
+CREATE OR REPLACE TRIGGER trg_2
 
-Update pessoa set data_aniversario = to_date('01/01/2020''DD/MM/RRRR')
-WHERE ID_PESSOA = 1;
+-- Define que o trigger será executado antes das operações INSERT ou UPDATE na tabela pessoa
+BEFORE INSERT OR UPDATE ON pessoa
+
+-- O trigger será aplicado a cada linha afetada
+FOR EACH ROW
+BEGIN
+    -- Verifica se o novo valor do campo data_aniversario é anterior à data atual (ignorando hora)
+    IF :NEW.data_aniversario < TRUNC(SYSDATE) THEN
+        -- Se for anterior à data de hoje, lança um erro e impede a operação
+        RAISE_APPLICATION_ERROR(-20100, 'data_aniversario inválida');
+    END IF;
+END;
+
+-- Atualiza o valor da coluna data_aniversario para uma nova data
+UPDATE pessoa
+SET data_aniversario = TO_DATE('01/01/2020', 'DD/MM/RRRR')  -- Converte a string para um tipo DATE no formato dia/mês/ano
+WHERE ID_PESSOA = 1;  -- Aplica a alteração somente ao registro com ID_PESSOA igual a 1
 
 --3.Na tabela pessoa, a data de cadastro deve ser maior ou igual a hoje
 
-create or replace trigger trg_3
-before insert or update on pessoa 
-for each row
-Begin
-	if :new.data_cadastro < Trunc(sysdate) then
-	raise_application_error (-20100, 'data_cadastro inválida');
-	end if;
-end;
+-- Cria ou substitui o trigger chamado trg_3
+CREATE OR REPLACE TRIGGER trg_3
 
-Update pessoa set data_cadastro = to_date('01/01/2014''DD/MM/RRRR')
-WHERE ID_PESSOA = 2;
+-- O trigger será disparado antes de uma operação INSERT ou UPDATE na tabela pessoa
+BEFORE INSERT OR UPDATE ON pessoa
 
+-- Executa o trigger para cada linha afetada
+FOR EACH ROW
+BEGIN
+    -- Verifica se o novo valor de data_cadastro é anterior à data atual (sem considerar hora)
+    IF :NEW.data_cadastro < TRUNC(SYSDATE) THEN
+        -- Se a data for anterior a hoje, lança erro e impede a operação
+        RAISE_APPLICATION_ERROR(-20100, 'data_cadastro inválida');
+    END IF;
+END;
 
+-- Tenta atualizar o campo data_cadastro da pessoa com ID 2
+UPDATE pessoa
+SET data_cadastro = TO_DATE('01/01/2014', 'DD/MM/RRRR')  -- Converte a string para data: 1º de janeiro de 2014
+WHERE ID_PESSOA = 2;  -- Aplica a alteração apenas à pessoa com ID_PESSOA igual a 2
+
+--Exercício2
+--Tabelas de logui não tem PK
 CREATE TABLE LOGUI
    (MENSAGEM VARCHAR2(100),
     USUARIO VARCHAR2(50),
@@ -101,13 +180,23 @@ CREATE TABLE LOGUI
     TP_MOV VARCHAR2(1));
 
 --Usando a tabela salário, copie todas as operações DML para a tabela logui
-create or replace trigger trg_salario
-before insert or update or delete on salario 
-for each row
-Begin
-	IF inserting then
-	Insert into logui values (:New.COD_Funcionario ||'-'||New.valor.salario, user, sysdate, 'I');
-	END IF;
+CREATE OR REPLACE TRIGGER trg_salario
+BEFORE INSERT OR UPDATE OR DELETE ON salario
+FOR EACH ROW
+BEGIN
+-- Quando for uma inserção
+    IF INSERTING THEN
+        INSERT INTO logui 
+        VALUES (:NEW.COD_FUNCIONARIO || '-' || :NEW.VALOR_SALARIO, USER, SYSDATE, 'I');
+
+    -- Quando for uma atualização
+    ELSIF UPDATING THEN
+        INSERT INTO logui 
+        VALUES (:NEW.COD_FUNCIONARIO || '-' || :NEW.VALOR_SALARIO, USER, SYSDATE, 'U');
+
+    -- Quando for uma exclusão
+    ELSIF DELETING THEN
+        INSERT INTO logui 
+        VALUES (:OLD.COD_FUNCIONARIO || '-' || :OLD.VALOR_SALARIO, USER, SYSDATE, 'D');
+    END IF;
 END;
-
-

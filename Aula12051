@@ -95,3 +95,38 @@ Depois de executar os comandos acima, você pode verificar o que foi registrado 
 
 SELECT * FROM logui;
 Você verá registros com TP_MOV sendo 'I', 'U' e 'D' representando respectivamente Insert, Update e Delete.
+
+
+O que é uma Trigger?
+Uma trigger (ou gatilho) é um bloco de código PL/SQL que é automaticamente executado pelo banco de dados quando ocorre um determinado evento em uma tabela ou view, como:
+
+INSERT (inserção de dados),
+
+UPDATE (atualização de dados),
+
+DELETE (exclusão de dados).
+
+🧠 Para que serve uma trigger?
+Triggers são úteis para:
+
+Auditar operações em tabelas (como gravar logs),
+
+Aplicar regras de negócio automáticas,
+
+Evitar alterações indevidas,
+
+Fazer verificações complexas antes de aceitar uma operação.
+
+📦 Estrutura básica de uma trigger
+
+CREATE OR REPLACE TRIGGER nome_da_trigger
+[BEFORE | AFTER] INSERT OR UPDATE OR DELETE ON nome_da_tabela
+[FOR EACH ROW]
+BEGIN
+   -- código que será executado automaticamente
+END;
+🔹 BEFORE ou AFTER?
+BEFORE: o código da trigger roda antes da operação DML.
+
+AFTER: o código roda depois que a operação foi executada com sucesso.
+

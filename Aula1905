@@ -1,4 +1,5 @@
---Crie uma trigger que insira os dados na tabela logcidade de acordo com os movimentos DML (Data Manipulation Language) - insert, update, delete - na tabela cidade.
+--Crie uma trigger que insira os dados na tabela logcidade de acordo com os movimentos
+DML (Data Manipulation Language) - insert, update, delete - na tabela cidade.
 CREATE TABLE CIDADE
    (    COD_CIDADE NUMBER(5,0),
     NOME_CIDADE VARCHAR2(100 BYTE),

@@ -276,5 +276,9 @@ WHERE COD_PESSOA = 1;
 DELETE FROM PESSOA
 WHERE COD_PESSOA = 3;
 
+UPDATE PESSOA
+SET COD_CIDADE_ENTREGA = 3
+WHERE COD_PESSOA = 1;
+
 --Boa prática: Evitar repetir OPEN/FETCH/CLOSE para o mesmo cursor — pode-se usar SELECT INTO diretamente, 
 --já que ele retorna um único valor.

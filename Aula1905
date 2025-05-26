@@ -1,5 +1,6 @@
 --Crie uma trigger que insira os dados na tabela logcidade de acordo com os movimentos
-DML (Data Manipulation Language) - insert, update, delete - na tabela cidade.
+--DML (Data Manipulation Language) - insert, update, delete - na tabela cidade.
+
 CREATE TABLE CIDADE
    (    COD_CIDADE NUMBER(5,0),
     NOME_CIDADE VARCHAR2(100 BYTE),
@@ -67,3 +68,213 @@ WHERE cod_CIDADE = 5;
 
 SELECT * FROM logCIDADE;
 SELECT * FROM CIDADE;
+
+
+--Criar a tabela Pessoa e a logpessoa.  
+--Na tabela log, foram adicionados o nome da cidade e o nome da cidade de entrega.
+--Então, como exercício, usando um cursor busque o nome da cidade e coloque na logpessoa.nome_cidade.
+
+CREATE TABLE PESSOA
+   (    COD_PESSOA NUMBER(7,0),
+    NOME VARCHAR2(100 BYTE),
+    DATA_NASC DATE,
+    ENDERECO VARCHAR2(100 BYTE),
+    COD_CIDADE NUMBER(5,0),
+    ENDERECO_ENTREGA VARCHAR2(100 BYTE),
+    COD_CIDADE_ENTREGA NUMBER(5,0),
+    DATA_CADSATRO DATE,
+     CONSTRAINT PESSOA_PK PRIMARY KEY (COD_PESSOA),
+   CONSTRAINT PESSOA_CIDADE_FK FOREIGN KEY (COD_CIDADE)       REFERENCES CIDADE (COD_CIDADE) ENABLE,
+     CONSTRAINT PESSOA_CIDADE_ENTREGA_FK FOREIGN KEY (COD_CIDADE_ENTREGA)       REFERENCES CIDADE (COD_CIDADE)
+   ) ;
+
+Insert into PESSOA (COD_PESSOA,NOME,DATA_NASC, ENDERECO, COD_CIDADE, ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, DATA_CADSATRO) values ('1','João Da Silva',to_date('01/01/2020','dd/mm/rrrr'), 'Rua d, 23', '1', 'Rua b, 52', '2',  to_date('01/01/2024','dd/mm/rrrr'));
+Insert into PESSOA (COD_PESSOA,NOME,DATA_NASC, ENDERECO, COD_CIDADE, ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, DATA_CADSATRO) values ('2','Maria de Lourdes',to_date('12/05/2018','dd/mm/rrrr'), 'Rua j, 230', '2', 'Rua c, 520', '3',  to_date('01/01/2025','dd/mm/rrrr'));
+Insert into PESSOA (COD_PESSOA,NOME,DATA_NASC, ENDERECO, COD_CIDADE, ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, DATA_CADSATRO) values ('3','João Augusto da Luz',to_date('01/01/2015','dd/mm/rrrr'), 'Rua h, 13', '3', 'Rua n, 502', '1',  to_date('01/10/2024','dd/mm/rrrr'));
+
+
+CREATE TABLE logPESSOA
+   (    COD_PESSOA NUMBER(7,0),
+    NOME VARCHAR2(100 BYTE),
+    DATA_NASC DATE,
+    ENDERECO VARCHAR2(100 BYTE),
+    COD_CIDADE NUMBER(5,0),
+    NOME_CIDADE VARCHAR2(100 BYTE),
+    ENDERECO_ENTREGA VARCHAR2(100 BYTE),
+    COD_CIDADE_ENTREGA NUMBER(5,0),
+   NOME_CIDADE_ENTREGA  VARCHAR2(100 BYTE),
+    DATA_CADSATRO DATE,
+     usuario varchar2(30),
+    tpmov  varchar2(1),
+    datamov date);
+
+-- Trigger sem cursor, usado subqueries diretas para buscar os nomes das cidades sem declarar um cursor explicitamente.
+CREATE OR REPLACE TRIGGER trg_logPESSOA
+AFTER INSERT OR UPDATE OR DELETE ON PESSOA
+FOR EACH ROW
+DECLARE
+    v_usuario              VARCHAR2(30);
+    v_nome_cidade          VARCHAR2(100);
+    v_nome_cidade_entrega  VARCHAR2(100);
+    v_tpmov                VARCHAR2(1);
+BEGIN
+    -- Pega o usuário atual
+    SELECT USER INTO v_usuario FROM DUAL;
+
+    IF INSERTING THEN
+        v_tpmov := 'I';
+        SELECT nome_cidade INTO v_nome_cidade
+        FROM cidade WHERE cod_cidade = :NEW.cod_cidade;
+
+        SELECT nome_cidade INTO v_nome_cidade_entrega
+        FROM cidade WHERE cod_cidade = :NEW.cod_cidade_entrega;
+
+        INSERT INTO logPESSOA (
+            COD_PESSOA, NOME, DATA_NASC, ENDERECO, COD_CIDADE, NOME_CIDADE,
+            ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, NOME_CIDADE_ENTREGA,
+            DATA_CADSATRO, usuario, tpmov, datamov
+        ) VALUES (
+            :NEW.COD_PESSOA, :NEW.NOME, :NEW.DATA_NASC, :NEW.ENDERECO, :NEW.COD_CIDADE, v_nome_cidade,
+            :NEW.ENDERECO_ENTREGA, :NEW.COD_CIDADE_ENTREGA, v_nome_cidade_entrega,
+            :NEW.DATA_CADSATRO, v_usuario, v_tpmov, SYSDATE
+        );
+
+    ELSIF UPDATING THEN
+        v_tpmov := 'U';
+        SELECT nome_cidade INTO v_nome_cidade
+        FROM cidade WHERE cod_cidade = :NEW.cod_cidade;
+
+        SELECT nome_cidade INTO v_nome_cidade_entrega
+        FROM cidade WHERE cod_cidade = :NEW.cod_cidade_entrega;
+
+        INSERT INTO logPESSOA (
+            COD_PESSOA, NOME, DATA_NASC, ENDERECO, COD_CIDADE, NOME_CIDADE,
+            ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, NOME_CIDADE_ENTREGA,
+            DATA_CADSATRO, usuario, tpmov, datamov
+        ) VALUES (
+            :NEW.COD_PESSOA, :NEW.NOME, :NEW.DATA_NASC, :NEW.ENDERECO, :NEW.COD_CIDADE, v_nome_cidade,
+            :NEW.ENDERECO_ENTREGA, :NEW.COD_CIDADE_ENTREGA, v_nome_cidade_entrega,
+            :NEW.DATA_CADSATRO, v_usuario, v_tpmov, SYSDATE
+        );
+
+    ELSIF DELETING THEN
+        v_tpmov := 'D';
+        SELECT nome_cidade INTO v_nome_cidade
+        FROM cidade WHERE cod_cidade = :OLD.cod_cidade;
+
+        SELECT nome_cidade INTO v_nome_cidade_entrega
+        FROM cidade WHERE cod_cidade = :OLD.cod_cidade_entrega;
+
+        INSERT INTO logPESSOA (
+            COD_PESSOA, NOME, DATA_NASC, ENDERECO, COD_CIDADE, NOME_CIDADE,
+            ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, NOME_CIDADE_ENTREGA,
+            DATA_CADSATRO, usuario, tpmov, datamov
+        ) VALUES (
+            :OLD.COD_PESSOA, :OLD.NOME, :OLD.DATA_NASC, :OLD.ENDERECO, :OLD.COD_CIDADE, v_nome_cidade,
+            :OLD.ENDERECO_ENTREGA, :OLD.COD_CIDADE_ENTREGA, v_nome_cidade_entrega,
+            :OLD.DATA_CADSATRO, v_usuario, v_tpmov, SYSDATE
+        );
+    END IF;
+END;
+
+--Trigger com cursor
+CREATE OR REPLACE TRIGGER trg_logPESSOA
+AFTER INSERT OR UPDATE OR DELETE ON PESSOA
+FOR EACH ROW
+DECLARE
+    v_usuario              VARCHAR2(30);
+    v_nome_cidade          VARCHAR2(100);
+    v_nome_cidade_entrega  VARCHAR2(100);
+    v_tpmov                VARCHAR2(1);
+
+    CURSOR c_busca_cidade(codigo NUMBER) IS
+        SELECT nome_cidade FROM cidade WHERE cod_cidade = codigo;
+BEGIN
+    -- Captura o nome do usuário atual
+    SELECT USER INTO v_usuario FROM DUAL;
+
+    IF INSERTING THEN
+        v_tpmov := 'I';
+
+        OPEN c_busca_cidade(:NEW.cod_cidade);
+        FETCH c_busca_cidade INTO v_nome_cidade;
+        CLOSE c_busca_cidade;
+
+        OPEN c_busca_cidade(:NEW.cod_cidade_entrega);
+        FETCH c_busca_cidade INTO v_nome_cidade_entrega;
+        CLOSE c_busca_cidade;
+
+        INSERT INTO logPESSOA (
+            COD_PESSOA, NOME, DATA_NASC, ENDERECO, COD_CIDADE, NOME_CIDADE,
+            ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, NOME_CIDADE_ENTREGA,
+            DATA_CADSATRO, usuario, tpmov, datamov
+        ) VALUES (
+            :NEW.COD_PESSOA, :NEW.NOME, :NEW.DATA_NASC, :NEW.ENDERECO, :NEW.COD_CIDADE, v_nome_cidade,
+            :NEW.ENDERECO_ENTREGA, :NEW.COD_CIDADE_ENTREGA, v_nome_cidade_entrega,
+            :NEW.DATA_CADSATRO, v_usuario, v_tpmov, SYSDATE
+        );
+
+    ELSIF UPDATING THEN
+        v_tpmov := 'U';
+
+        OPEN c_busca_cidade(:NEW.cod_cidade);
+        FETCH c_busca_cidade INTO v_nome_cidade;
+        CLOSE c_busca_cidade;
+
+        OPEN c_busca_cidade(:NEW.cod_cidade_entrega);
+        FETCH c_busca_cidade INTO v_nome_cidade_entrega;
+        CLOSE c_busca_cidade;
+
+        INSERT INTO logPESSOA (
+            COD_PESSOA, NOME, DATA_NASC, ENDERECO, COD_CIDADE, NOME_CIDADE,
+            ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, NOME_CIDADE_ENTREGA,
+            DATA_CADSATRO, usuario, tpmov, datamov
+        ) VALUES (
+            :NEW.COD_PESSOA, :NEW.NOME, :NEW.DATA_NASC, :NEW.ENDERECO, :NEW.COD_CIDADE, v_nome_cidade,
+            :NEW.ENDERECO_ENTREGA, :NEW.COD_CIDADE_ENTREGA, v_nome_cidade_entrega,
+            :NEW.DATA_CADSATRO, v_usuario, v_tpmov, SYSDATE
+        );
+
+    ELSIF DELETING THEN
+        v_tpmov := 'D';
+
+        OPEN c_busca_cidade(:OLD.cod_cidade);
+        FETCH c_busca_cidade INTO v_nome_cidade;
+        CLOSE c_busca_cidade;
+
+        OPEN c_busca_cidade(:OLD.cod_cidade_entrega);
+        FETCH c_busca_cidade INTO v_nome_cidade_entrega;
+        CLOSE c_busca_cidade;
+
+        INSERT INTO logPESSOA (
+            COD_PESSOA, NOME, DATA_NASC, ENDERECO, COD_CIDADE, NOME_CIDADE,
+            ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, NOME_CIDADE_ENTREGA,
+            DATA_CADSATRO, usuario, tpmov, datamov
+        ) VALUES (
+            :OLD.COD_PESSOA, :OLD.NOME, :OLD.DATA_NASC, :OLD.ENDERECO, :OLD.COD_CIDADE, v_nome_cidade,
+            :OLD.ENDERECO_ENTREGA, :OLD.COD_CIDADE_ENTREGA, v_nome_cidade_entrega,
+            :OLD.DATA_CADSATRO, v_usuario, v_tpmov, SYSDATE
+        );
+    END IF;
+END;
+
+SELECT * FROM logPESSOA;
+SELECT * FROM PESSOA;
+
+INSERT INTO PESSOA (
+    COD_PESSOA, NOME, DATA_NASC, ENDERECO, COD_CIDADE,
+    ENDERECO_ENTREGA, COD_CIDADE_ENTREGA, DATA_CADSATRO
+) VALUES (
+    4, 'Maria Silva', TO_DATE('1990-06-01','YYYY-MM-DD'), 'Rua das Flores, 123', 2,
+    'Av. Brasil, 456', 1, SYSDATE
+);
+
+UPDATE PESSOA
+SET NOME = 'João Souza'
+WHERE COD_PESSOA = 1;
+
+DELETE FROM PESSOA
+WHERE COD_PESSOA = 3;
+
+--Boa prática: Evitar repetir OPEN/FETCH/CLOSE para o mesmo cursor — pode-se usar SELECT INTO diretamente, 
+--já que ele retorna um único valor.

@@ -15,7 +15,7 @@ drop table fornecedor cascade constraints;
     "VALOR_PEDIDO" NUMBER(12,2) DEFAULT 0
    )  ;
 --------------------------------------------------------
---  DDL for Table RPRODUTO
+--  DDL for Table RPRODUTO 
 --------------------------------------------------------
 
   CREATE TABLE PRODUTO
@@ -96,7 +96,7 @@ Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('6','SÃO PAULO','SP
 Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('7','MONTEVIDEO',null,'URUGUAI');
 Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('8','CORDOBA',null,'ARGENTINA');
 -------------------------------------------------------
---  DDL for Index RPEDIDO_PK
+--  DDL for Index RPEDIDO_PK (Em resumo: O DDL cria a tabela PEDIDO e define o IDPEDIDO como a chave primária, criando um índice automático e garantindo a unicidade e integridade dos dados).
 --------------------------------------------------------
 
   CREATE UNIQUE INDEX "RPEDIDO_PK" ON "PEDIDO" ("COD_PEDIDO") ;

@@ -1,0 +1,326 @@
+--  DDL for Table RPEDIDO
+--------------------------------------------------------
+drop table pedido cascade constraints;
+drop table produto cascade constraints;
+drop table cidade cascade constraints;
+drop table item_pedido cascade constraints;
+drop table fornecedor cascade constraints;
+
+  CREATE TABLE PEDIDO
+   (    "COD_PEDIDO" NUMBER(5,0),
+    "COD_CIDADE_ENTREGA" NUMBER(5,0),
+    "COD_FORNECEDOR" NUMBER(5,0),
+    "DATA_PEDIDO" DATE,
+    "DATA_ENTREGA" DATE,
+    "VALOR_PEDIDO" NUMBER(12,2) DEFAULT 0
+   )  ;
+--------------------------------------------------------
+--  DDL for Table RPRODUTO
+--------------------------------------------------------
+
+  CREATE TABLE PRODUTO
+   (    "COD_PRODUTO" NUMBER(5,0),
+    "DESCR_PRODUTO" VARCHAR2(100 BYTE),
+    "ATIVO_INATIVO" VARCHAR2(1 BYTE),
+    "DATA_CADASTRO" DATE,
+    "DATA_INATIVACAO_PRODUTI" DATE,
+    "VALOR_PRODUTO" NUMBER(12,2) DEFAULT 0)  ;
+--------------------------------------------------------
+--  DDL for Table RITEM_PEDIDO
+--------------------------------------------------------
+
+  CREATE TABLE "ITEM_PEDIDO"
+   (    "COD_PEDIDO" NUMBER(5,0),
+    "COD_PRODUTO" NUMBER(5,0),
+    "QTD_PRODUTO" NUMBER(7,0))  ;
+--------------------------------------------------------
+--  DDL for Table RFORNECEDOR
+--------------------------------------------------------
+
+  CREATE TABLE "FORNECEDOR"
+   (    "COD_FORNECEDOR" NUMBER(5,0),
+    "NOME_FORNECEDOR" VARCHAR2(100 BYTE),
+    "COD_CIDADE" NUMBER(5,0))  ;
+--------------------------------------------------------
+--  DDL for Table RCIDADE
+--------------------------------------------------------
+
+  CREATE TABLE "CIDADE"
+   (    "COD_CIDADE" NUMBER(5,0),
+    "NOME_CIDADE" VARCHAR2(100 BYTE),
+    "UF" VARCHAR2(2 BYTE),
+    "PAIS" VARCHAR2(200 BYTE))  ;
+
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('1','1','1',to_date('01/07/13','DD/MM/RR'),null,'220');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('2','6','1',to_date('01/06/13','DD/MM/RR'),null,'75');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('3','6','1',to_date('10/06/13','DD/MM/RR'),null,'150');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('4','2','1',to_date('10/06/13','DD/MM/RR'),null,'120');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('5','1','4',to_date('12/06/13','DD/MM/RR'),null,'100');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('6','2','5',to_date('20/06/13','DD/MM/RR'),null,'110');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('7','2','3',to_date('15/06/13','DD/MM/RR'),null,'80');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('8','2','4',to_date('22/06/13','DD/MM/RR'),null,'81');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('9','3','3',to_date('02/07/13','DD/MM/RR'),null,'110');
+Insert into PEDIDO (COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO) values ('10','4','4',to_date('02/07/13','DD/MM/RR'),null,'121');
+
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('1','A BARCA','A',to_date('01/07/12','DD/MM/RR'),null,'30');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('2','O MARINHEIRO','A',to_date('01/10/12','DD/MM/RR'),null,'10');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('3','AMEI-TE E POR TE AMAR','A',to_date('01/10/11','DD/MM/RR'),null,'25');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('4','O CARNAVAL DOS ANIMAIS','A',to_date('01/09/10','DD/MM/RR'),null,'20');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('5','A BALADA DO FALSO MESSIAS','A',to_date('01/08/12','DD/MM/RR'),null,'10');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('6','O AMANTE DA MADONNA','A',to_date('01/07/11','DD/MM/RR'),null,'11');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('7','FLAUTA DOCE','A',to_date('01/02/10','DD/MM/RR'),null,'10');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('8','A ASA ESQUERDA DO ANJO','I',to_date('01/02/09','DD/MM/RR'),to_date('01/02/12','DD/MM/RR'),'10');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('9','O PONTO CEGO','I',to_date('01/02/08','DD/MM/RR'),to_date('01/02/11','DD/MM/RR'),'5');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('10','A RIQUEZA DO MUNDO','I',to_date('01/02/08','DD/MM/RR'),to_date('01/03/13','DD/MM/RR'),'33');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('11','O OURO DAS MISSOES','A',to_date('01/01/10','DD/MM/RR'),null,'22');
+Insert into PRODUTO (COD_PRODUTO,DESCR_PRODUTO,ATIVO_INATIVO,DATA_CADASTRO,DATA_INATIVACAO_PRODUTI,VALOR_PRODUTO) values ('12','A MÁQUINA FANTABULÁSTICA','A',to_date('01/02/12','DD/MM/RR'),null,'50');
+
+Insert into ITEM_PEDIDO (COD_PEDIDO,COD_PRODUTO,QTD_PRODUTO) values ('1','1','5');
+Insert into ITEM_PEDIDO (COD_PEDIDO,COD_PRODUTO,QTD_PRODUTO) values ('1','2','7');
+Insert into ITEM_PEDIDO (COD_PEDIDO,COD_PRODUTO,QTD_PRODUTO) values ('2','3','3');
+Insert into ITEM_PEDIDO (COD_PEDIDO,COD_PRODUTO,QTD_PRODUTO) values ('3','2','2');
+Insert into ITEM_PEDIDO (COD_PEDIDO,COD_PRODUTO,QTD_PRODUTO) values ('3','3','9');
+
+Insert into FORNECEDOR (COD_FORNECEDOR,NOME_FORNECEDOR,COD_CIDADE) values ('1','FERNANDO PESSOA','6');
+Insert into FORNECEDOR (COD_FORNECEDOR,NOME_FORNECEDOR,COD_CIDADE) values ('2','MOACYR SCLIAR','4');
+Insert into FORNECEDOR (COD_FORNECEDOR,NOME_FORNECEDOR,COD_CIDADE) values ('3','LYA LUFT','4');
+Insert into FORNECEDOR (COD_FORNECEDOR,NOME_FORNECEDOR,COD_CIDADE) values ('4','SIMONE SAUERESSIG','1');
+Insert into FORNECEDOR (COD_FORNECEDOR,NOME_FORNECEDOR,COD_CIDADE) values ('5','XICO ALBUQUERQUE','2');
+
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('1','NOVO HAMBURGO','RS','BRASIL');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('2','ESTEIO','RS','BRASIL');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('3','CANOAS','RS','BRASIL');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('4','PORTO ALEGRE','RS','BRASIL');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('5','BUENOS AIRES',null,'ARGENTINA');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('6','SÃO PAULO','SP','BRASIL');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('7','MONTEVIDEO',null,'URUGUAI');
+Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('8','CORDOBA',null,'ARGENTINA');
+-------------------------------------------------------
+--  DDL for Index RPEDIDO_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "RPEDIDO_PK" ON "PEDIDO" ("COD_PEDIDO") ;
+ 
+--------------------------------------------------------
+--  DDL for Index RPRODUTO_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "RPRODUTO_PK" ON "PRODUTO" ("COD_PRODUTO") ;
+--------------------------------------------------------
+--  DDL for Index RITEM_PEDIDO_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "RITEM_PEDIDO_PK" ON "ITEM_PEDIDO" ("COD_PEDIDO", "COD_PRODUTO");
+--------------------------------------------------------
+--  DDL for Index RFORNECEDOR_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "RFORNECEDOR_PK" ON "FORNECEDOR" ("COD_FORNECEDOR");
+--------------------------------------------------------
+--  DDL for Index RCIDADE_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "RCIDADE_PK" ON "CIDADE" ("COD_CIDADE");
+--------------------------------------------------------
+--  Constraints for Table RPEDIDO
+--------------------------------------------------------
+
+  ALTER TABLE "PEDIDO" ADD CONSTRAINT "PEDIDO_PK" PRIMARY KEY ("COD_PEDIDO");
+  ALTER TABLE "PEDIDO" MODIFY ("DATA_PEDIDO" NOT NULL ENABLE);
+  ALTER TABLE "PEDIDO" MODIFY ("COD_CIDADE_ENTREGA" NOT NULL ENABLE);
+  ALTER TABLE "PEDIDO" MODIFY ("COD_PEDIDO" NOT NULL ENABLE);
+--------------------------------------------------------
+--  Constraints for Table RPRODUTO
+--------------------------------------------------------
+
+  ALTER TABLE "PRODUTO" ADD CONSTRAINT "RPRODUTO_PK" PRIMARY KEY ("COD_PRODUTO")
+  ENABLE;
+  ALTER TABLE "PRODUTO" MODIFY ("DATA_CADASTRO" NOT NULL ENABLE);
+  ALTER TABLE "PRODUTO" MODIFY ("ATIVO_INATIVO" NOT NULL ENABLE);
+  ALTER TABLE "PRODUTO" MODIFY ("DESCR_PRODUTO" NOT NULL ENABLE);
+  ALTER TABLE "PRODUTO" MODIFY ("COD_PRODUTO" NOT NULL ENABLE);
+--------------------------------------------------------
+--  Constraints for Table RITEM_PEDIDO
+--------------------------------------------------------
+
+  ALTER TABLE "ITEM_PEDIDO" ADD CONSTRAINT "RITEM_PEDIDO_PK" PRIMARY KEY ("COD_PEDIDO", "COD_PRODUTO")
+    ENABLE;
+  ALTER TABLE "ITEM_PEDIDO" MODIFY ("QTD_PRODUTO" NOT NULL ENABLE);
+  ALTER TABLE "ITEM_PEDIDO" MODIFY ("COD_PRODUTO" NOT NULL ENABLE);
+  ALTER TABLE "ITEM_PEDIDO" MODIFY ("COD_PEDIDO" NOT NULL ENABLE);
+-------------------------------------------------------
+--  Constraints for Table RFORNECEDOR
+--------------------------------------------------------
+
+  ALTER TABLE "FORNECEDOR" ADD CONSTRAINT "RFORNECEDOR_PK" PRIMARY KEY ("COD_FORNECEDOR")
+    ENABLE;
+  ALTER TABLE "FORNECEDOR" MODIFY ("COD_CIDADE" NOT NULL ENABLE);
+  ALTER TABLE "FORNECEDOR" MODIFY ("NOME_FORNECEDOR" NOT NULL ENABLE);
+  ALTER TABLE "FORNECEDOR" MODIFY ("COD_FORNECEDOR" NOT NULL ENABLE);
+--------------------------------------------------------
+--  Constraints for Table RCIDADE
+--------------------------------------------------------
+
+  ALTER TABLE "CIDADE" ADD CONSTRAINT "RCIDADE_PK" PRIMARY KEY ("COD_CIDADE")
+  ENABLE;
+  ALTER TABLE "CIDADE" MODIFY ("PAIS" NOT NULL ENABLE);
+  ALTER TABLE "CIDADE" MODIFY ("NOME_CIDADE" NOT NULL ENABLE);
+  ALTER TABLE "CIDADE" MODIFY ("COD_CIDADE" NOT NULL ENABLE);
+-------------------------------------------------------
+--  Ref Constraints for Table RPEDIDO
+--------------------------------------------------------
+
+  ALTER TABLE "PEDIDO" ADD CONSTRAINT "R_CIDADE_ENTREGA_PEDIDO" FOREIGN KEY ("COD_CIDADE_ENTREGA")
+      REFERENCES "CIDADE" ("COD_CIDADE") ENABLE;
+  ALTER TABLE "PEDIDO" ADD CONSTRAINT "R_FORNECEDOR_PEDIDO_FK" FOREIGN KEY ("COD_FORNECEDOR")
+      REFERENCES "FORNECEDOR" ("COD_FORNECEDOR") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table RITEM_PEDIDO
+--------------------------------------------------------
+
+  ALTER TABLE "ITEM_PEDIDO" ADD CONSTRAINT "RPEDIDO_ITEM_PEDIDO_FK" FOREIGN KEY ("COD_PEDIDO")
+      REFERENCES "PEDIDO" ("COD_PEDIDO") ENABLE;
+  ALTER TABLE "ITEM_PEDIDO" ADD CONSTRAINT "RPRODUTO_ITEM_PEDIDO_FK" FOREIGN KEY ("COD_PRODUTO")
+      REFERENCES "PRODUTO" ("COD_PRODUTO") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table RFORNECEDOR
+--------------------------------------------------------
+
+  ALTER TABLE "FORNECEDOR" ADD CONSTRAINT "R_CIDADE_FORNECEDOR" FOREIGN KEY ("COD_CIDADE")
+      REFERENCES "CIDADE" ("COD_CIDADE") ENABLE;
+
+
+CREATE TABLE "LOG_ITEM_PEDIDO"
+   (    "COD_PEDIDO" NUMBER(5,0),
+    "COD_PRODUTO" NUMBER(5,0),
+    "QTD_PRODUTO" NUMBER(7,0),
+    VALOR_PEDIDO NUMBER(12,2),
+    DESCR_PRODUTO VARCHAR2(100),
+    USUARIO VARCHAR2(100),
+    TP_MOV VARCHAR2(1),
+    DATA_MOV DATE)  ;
+
+   -- 2) Criar uma trigger que grave os movimentos da item pedido na log_item_pedido. Observação: a trigger precisa ter dois cursores: 
+   --um para buscar a descrição do produto e outro cursor para buscar o valor do pedido.
+
+CREATE OR REPLACE TRIGGER trg_LOG_ITEM_PEDIDO
+  AFTER INSERT OR UPDATE OR DELETE ON PEDIDO 
+  FOR EACH ROW
+DECLARE
+  v_usuario          VARCHAR2(30);
+  v_descr_produto    VARCHAR2(100);
+  v_valor_pedido     NUMBER(12,2);
+  v_tpmov            VARCHAR2(1);
+
+  CURSOR c_produto IS
+    SELECT descr_produto FROM produto WHERE cod_produto = :NEW.cod_produto;
+  CURSOR c_pedido IS
+    SELECT valor_pedido FROM pedido WHERE cod_pedido = :NEW.cod_pedido;
+BEGIN
+  -- Captura o nome do usuário atual
+  SELECT USER INTO v_usuario FROM DUAL;
+
+  -- Determina o tipo de operação (I = INSERT, U = UPDATE, D = DELETE)
+  IF INSERTING THEN
+    v_tpmov := 'I';
+  ELSIF UPDATING THEN
+    v_tpmov := 'U';
+  ELSIF DELETING THEN
+    v_tpmov := 'D';
+  END IF;
+
+  -- Obtém a descrição do produto
+  OPEN c_produto;
+  FETCH c_produto INTO v_descr_produto;
+  CLOSE c_produto;
+
+  -- Obtém o valor do pedido
+  OPEN c_pedido;
+  FETCH c_pedido INTO v_valor_pedido;
+  CLOSE c_pedido;
+
+  -- Insere o registro no log
+  INSERT INTO LOG_ITEM_PEDIDO (
+    COD_PEDIDO, COD_PRODUTO, VALOR_PEDIDO, DESCR_PRODUTO, USUARIO, TP_MOV, DATA_MOV
+  ) VALUES (
+    :NEW.COD_PEDIDO, :NEW.COD_PRODUTO, :NEW.VALOR_PEDIDO, v_descr_produto, v_usuario,
+    v_tpmov, SYSDATE
+  );
+END;
+
+
+
+SELECT * FROM log_item_pedido;
+SELECT * FROM Produto;
+SELECT * FROM Pedido;
+
+
+INSERT INTO PEDIDO (
+    COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO
+) VALUES ('11','2','5',to_date('01/07/13','DD/MM/RR'),null,'220');
+
+
+UPDATE PRODUTO
+SET DESCR_PRODUTO = 'BARCA'
+WHERE COD_PESSOA = 1;
+
+DELETE FROM PEDIDO
+WHERE COD_PEDIDO = 3;
+
+UPDATE PEDIDO
+SET VALOR_PEDIDO = 160
+WHERE COD_PESSOA = 3;
+
+
+
+   --3) Crie uma tabela log_fornecedor e grave todas as movimentações da tabela fornecedor, inclusive crie um campo para gravar o nome da 
+   --cidade do fornecedor. Use também um cursor para buscar o nome da cidade do fornecedor.
+
+   CREATE TABLE "LOG_FORNECEDOR"
+   (    "COD_FORNECEDOR" NUMBER(5,0),
+    "NOME_FORNECEDOR" VARCHAR2(100 BYTE),
+    "COD_CIDADE" NUMBER(5,0)  ,
+    "NOME_CIDADE" VARCHAR2(100 BYTE),
+    USUARIO VARCHAR2(100),
+    TP_MOV VARCHAR2(1),
+    DATA_MOV DATE)  ;
+
+    CREATE OR REPLACE TRIGGER trg_LOG_FORNECEDOR
+  AFTER INSERT OR UPDATE OR DELETE ON FORNECEDOR 
+  FOR EACH ROW
+DECLARE
+  v_usuario          VARCHAR2(30);
+  v_nome_cidade     VARCHAR2(100);
+  v_tpmov            VARCHAR2(1);
+
+  CURSOR c_cidade IS
+    SELECT v_nome_cidade FROM cidade WHERE cod_cidade = :NEW.cod_cidade;
+  
+BEGIN
+  -- Captura o nome do usuário atual
+  SELECT USER INTO v_usuario FROM DUAL;
+
+  -- Determina o tipo de operação (I = INSERT, U = UPDATE, D = DELETE)
+  IF INSERTING THEN
+    v_tpmov := 'I';
+  ELSIF UPDATING THEN
+    v_tpmov := 'U';
+  ELSIF DELETING THEN
+    v_tpmov := 'D';
+  END IF;
+
+  -- Obtém o nome da cidade
+  OPEN c_cidade;
+  FETCH c_cidade INTO v_nome_cidade;
+  CLOSE c_cidade;
+
+   -- Insere o registro no log
+  INSERT INTO LOG_FORNECEDOR (
+    COD_FORNECEDOR, NOME_FORNECEDOR, COD_CIDADE, NOME_CIDADE, USUARIO, TP_MOV, DATA_MOV
+  ) VALUES (
+    :NEW.COD_FORNECEDOR, :NEW.NOME_FORNECEDOR, :NEW.COD_CIDADE, :NEW.NOME_CIDADE, v_nome_cidade, v_usuario,
+    v_tpmov, SYSDATE
+  );
+END;
+
+--4) Para cada item_pedido inserido, atualizar o valor total do pedido. Pedido.valor_pedido := Item_pedido.Qtd * Produto.vlr_Produto

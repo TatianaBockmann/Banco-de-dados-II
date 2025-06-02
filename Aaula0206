@@ -1,0 +1,32 @@
+CREATE TABLE PRODUTO
+   (    "ID_PRODUTO" NUMBER(5,0),
+    "DESCR_PRODUTO" VARCHAR2(100 BYTE),
+    constraint PRODUTO_pk primary key (ID_PRODUTO));
+
+CREATE TABLE ESTOQUE
+   ( "ID_ESTOQUE" NUMBER(5,0),
+    "ID_PRODUTO" NUMBER(5,0),
+    QTD number(12,2),
+    constraint ESTOQUE_pk primary key (ID_ESTOQUE, ID_PRODUTO),
+	constraint ESTOQUE_PRODUTO_fk foreign key (ID_PRODUTO) references PRODUTO(ID_PRODUTO));
+
+CREATE TABLE MOVESTOQUE
+   (    "ID_MOVESTOQUE" NUMBER(5,0),
+    "ID_ESTOQUE" NUMBER(5,0),
+    "ID_PRODUTO" NUMBER(5,0),
+    QTD_MOV number(12,2),
+    USUARIO VARCHAR2(100),
+    TP_MOV VARCHAR2(1),
+    constraint MOVESTOQUE_pk primary key (ID_MOVESTOQUE),
+	constraint MOVESTOQUE_ESTOQUE_fk foreign key (ID_ESTOQUE, ID_PRODUTO) references ESTOQUE(ID_ESTOQUE, ID_PRODUTO),
+	constraint MOVESTOQUE_PRODUTO_fk foreign key (ID_PRODUTO) references PRODUTO(ID_PRODUTO));
+
+Insert into PRODUTO (ID_PRODUTO, DESCR_PRODUTO) values ('1','BARRACA');
+Insert into PRODUTO (ID_PRODUTO, DESCR_PRODUTO) values ('2','BARCO');
+Insert into PRODUTO (ID_PRODUTO, DESCR_PRODUTO) values ('3','CADEIRA');
+Insert into PRODUTO (ID_PRODUTO, DESCR_PRODUTO) values ('4','MESA');
+
+Insert into ESTOQUE (ID_ESTOQUE, ID_PRODUTO, QTD) values ('1', '4','0');
+Insert into ESTOQUE (ID_ESTOQUE, ID_PRODUTO, QTD) values ('1, '3','0');
+Insert into ESTOQUE (ID_ESTOQUE, ID_PRODUTO, QTD) values ('1', '2','0');
+Insert into ESTOQUE (ID_ESTOQUE, ID_PRODUTO, QTD) values ('1', '1','0');

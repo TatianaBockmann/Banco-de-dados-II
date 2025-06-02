@@ -185,8 +185,7 @@ Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('8','CORDOBA',null,'
 --------------------------------------------------------
 --  Ref Constraints for Table RFORNECEDOR
 --------------------------------------------------------
-
-  ALTER TABLE "FORNECEDOR" ADD CONSTRAINT "R_CIDADE_FORNECEDOR" FOREIGN KEY ("COD_CIDADE")
+ ALTER TABLE "FORNECEDOR" ADD CONSTRAINT "R_CIDADE_FORNECEDOR" FOREIGN KEY ("COD_CIDADE")
       REFERENCES "CIDADE" ("COD_CIDADE") ENABLE;
 
 
@@ -200,127 +199,199 @@ CREATE TABLE "LOG_ITEM_PEDIDO"
     TP_MOV VARCHAR2(1),
     DATA_MOV DATE)  ;
 
-   -- 2) Criar uma trigger que grave os movimentos da item pedido na log_item_pedido. Observação: a trigger precisa ter dois cursores: 
+-- 2) Criar uma trigger que grave os movimentos da item pedido na log_item_pedido. Observação: a trigger precisa ter dois cursores: 
    --um para buscar a descrição do produto e outro cursor para buscar o valor do pedido.
 
 CREATE OR REPLACE TRIGGER trg_LOG_ITEM_PEDIDO
-  AFTER INSERT OR UPDATE OR DELETE ON PEDIDO 
-  FOR EACH ROW
+AFTER INSERT OR UPDATE OR DELETE ON ITEM_PEDIDO
+FOR EACH ROW
 DECLARE
-  v_usuario          VARCHAR2(30);
-  v_descr_produto    VARCHAR2(100);
-  v_valor_pedido     NUMBER(12,2);
-  v_tpmov            VARCHAR2(1);
+  v_usuario        VARCHAR2(100);
+  v_descr_produto  VARCHAR2(100);
+  v_valor_pedido   NUMBER(12,2);
+  v_tp_mov         VARCHAR2(1);
 
-  CURSOR c_produto IS
-    SELECT descr_produto FROM produto WHERE cod_produto = :NEW.cod_produto;
-  CURSOR c_pedido IS
-    SELECT valor_pedido FROM pedido WHERE cod_pedido = :NEW.cod_pedido;
+  CURSOR c_produto(p_cod_produto NUMBER) IS
+    SELECT descr_produto FROM produto WHERE cod_produto = p_cod_produto;
+
+  CURSOR c_pedido(p_cod_pedido NUMBER) IS
+    SELECT valor_pedido FROM pedido WHERE cod_pedido = p_cod_pedido;
+
 BEGIN
-  -- Captura o nome do usuário atual
-  SELECT USER INTO v_usuario FROM DUAL;
+  -- Descobre o usuário
+  SELECT USER INTO v_usuario FROM dual;
 
-  -- Determina o tipo de operação (I = INSERT, U = UPDATE, D = DELETE)
+  -- Define tipo de movimentação
   IF INSERTING THEN
-    v_tpmov := 'I';
+    v_tp_mov := 'I';
+
+    OPEN c_produto(:NEW.cod_produto);
+    FETCH c_produto INTO v_descr_produto;
+    CLOSE c_produto;
+
+    OPEN c_pedido(:NEW.cod_pedido);
+    FETCH c_pedido INTO v_valor_pedido;
+    CLOSE c_pedido;
+
+    INSERT INTO LOG_ITEM_PEDIDO (
+      COD_PEDIDO, COD_PRODUTO, QTD_PRODUTO,
+      VALOR_PEDIDO, DESCR_PRODUTO, USUARIO, TP_MOV, DATA_MOV
+    ) VALUES (
+      :NEW.cod_pedido, :NEW.cod_produto, :NEW.qtd_produto,
+      v_valor_pedido, v_descr_produto, v_usuario, v_tp_mov, SYSDATE
+    );
+
   ELSIF UPDATING THEN
-    v_tpmov := 'U';
+    v_tp_mov := 'U';
+
+    OPEN c_produto(:NEW.cod_produto);
+    FETCH c_produto INTO v_descr_produto;
+    CLOSE c_produto;
+
+    OPEN c_pedido(:NEW.cod_pedido);
+    FETCH c_pedido INTO v_valor_pedido;
+    CLOSE c_pedido;
+
+    INSERT INTO LOG_ITEM_PEDIDO (
+      COD_PEDIDO, COD_PRODUTO, QTD_PRODUTO,
+      VALOR_PEDIDO, DESCR_PRODUTO, USUARIO, TP_MOV, DATA_MOV
+    ) VALUES (
+      :NEW.cod_pedido, :NEW.cod_produto, :NEW.qtd_produto,
+      v_valor_pedido, v_descr_produto, v_usuario, v_tp_mov, SYSDATE
+    );
+
   ELSIF DELETING THEN
-    v_tpmov := 'D';
+    v_tp_mov := 'D';
+
+    OPEN c_produto(:OLD.cod_produto);
+    FETCH c_produto INTO v_descr_produto;
+    CLOSE c_produto;
+
+    OPEN c_pedido(:OLD.cod_pedido);
+    FETCH c_pedido INTO v_valor_pedido;
+    CLOSE c_pedido;
+
+    INSERT INTO LOG_ITEM_PEDIDO (
+      COD_PEDIDO, COD_PRODUTO, QTD_PRODUTO,
+      VALOR_PEDIDO, DESCR_PRODUTO, USUARIO, TP_MOV, DATA_MOV
+    ) VALUES (
+      :OLD.cod_pedido, :OLD.cod_produto, :OLD.qtd_produto,
+      v_valor_pedido, v_descr_produto, v_usuario, v_tp_mov, SYSDATE
+    );
   END IF;
-
-  -- Obtém a descrição do produto
-  OPEN c_produto;
-  FETCH c_produto INTO v_descr_produto;
-  CLOSE c_produto;
-
-  -- Obtém o valor do pedido
-  OPEN c_pedido;
-  FETCH c_pedido INTO v_valor_pedido;
-  CLOSE c_pedido;
-
-  -- Insere o registro no log
-  INSERT INTO LOG_ITEM_PEDIDO (
-    COD_PEDIDO, COD_PRODUTO, VALOR_PEDIDO, DESCR_PRODUTO, USUARIO, TP_MOV, DATA_MOV
-  ) VALUES (
-    :NEW.COD_PEDIDO, :NEW.COD_PRODUTO, :NEW.VALOR_PEDIDO, v_descr_produto, v_usuario,
-    v_tpmov, SYSDATE
-  );
 END;
 
 
 
-SELECT * FROM log_item_pedido;
+SELECT * FROM LOG_ITEM_PEDIDO;
 SELECT * FROM Produto;
 SELECT * FROM Pedido;
-
-
+SELECT COUNT(*) FROM LOG_ITEM_PEDIDO;
+SELECT * FROM "LOG_ITEM_PEDIDO";
 INSERT INTO PEDIDO (
     COD_PEDIDO,COD_CIDADE_ENTREGA,COD_FORNECEDOR,DATA_PEDIDO,DATA_ENTREGA,VALOR_PEDIDO
 ) VALUES ('11','2','5',to_date('01/07/13','DD/MM/RR'),null,'220');
 
 
 UPDATE PRODUTO
-SET DESCR_PRODUTO = 'BARCA'
-WHERE COD_PESSOA = 1;
+SET DESCR_PRODUTO = 'ARCA'
+WHERE COD_PRODUTO = 1;
 
 DELETE FROM PEDIDO
 WHERE COD_PEDIDO = 3;
 
 UPDATE PEDIDO
 SET VALOR_PEDIDO = 160
-WHERE COD_PESSOA = 3;
+WHERE COD_PEDIDO = 3;
 
+ --3) Crie uma tabela log_fornecedor e grave todas as movimentações da tabela fornecedor, inclusive crie um campo para 
+--gravar o nome da cidade do fornecedor. Use também um cursor para buscar o nome da cidade do fornecedor.
 
-
-   --3) Crie uma tabela log_fornecedor e grave todas as movimentações da tabela fornecedor, inclusive crie um campo para gravar o nome da 
-   --cidade do fornecedor. Use também um cursor para buscar o nome da cidade do fornecedor.
-
-   CREATE TABLE "LOG_FORNECEDOR"
-   (    "COD_FORNECEDOR" NUMBER(5,0),
-    "NOME_FORNECEDOR" VARCHAR2(100 BYTE),
-    "COD_CIDADE" NUMBER(5,0)  ,
-    "NOME_CIDADE" VARCHAR2(100 BYTE),
-    USUARIO VARCHAR2(100),
-    TP_MOV VARCHAR2(1),
-    DATA_MOV DATE)  ;
-
-    CREATE OR REPLACE TRIGGER trg_LOG_FORNECEDOR
-  AFTER INSERT OR UPDATE OR DELETE ON FORNECEDOR 
-  FOR EACH ROW
+   CREATE OR REPLACE TRIGGER trg_LOG_FORNECEDOR
+AFTER INSERT OR UPDATE OR DELETE ON FORNECEDOR
+FOR EACH ROW
 DECLARE
-  v_usuario          VARCHAR2(30);
-  v_nome_cidade     VARCHAR2(100);
-  v_tpmov            VARCHAR2(1);
+  v_usuario      VARCHAR2(30);
+  v_nome_cidade  VARCHAR2(100);
+  v_tpmov        VARCHAR2(1);
 
-  CURSOR c_cidade IS
-    SELECT v_nome_cidade FROM cidade WHERE cod_cidade = :NEW.cod_cidade;
-  
+  CURSOR c_cidade(p_cod_cidade NUMBER) IS
+    SELECT nome_cidade FROM cidade WHERE cod_cidade = p_cod_cidade;
 BEGIN
   -- Captura o nome do usuário atual
   SELECT USER INTO v_usuario FROM DUAL;
 
-  -- Determina o tipo de operação (I = INSERT, U = UPDATE, D = DELETE)
+  -- Determina o tipo de operação
   IF INSERTING THEN
     v_tpmov := 'I';
+
+    OPEN c_cidade(:NEW.cod_cidade);
+    FETCH c_cidade INTO v_nome_cidade;
+    CLOSE c_cidade;
+
+    INSERT INTO LOG_FORNECEDOR (
+      COD_FORNECEDOR, NOME_FORNECEDOR, COD_CIDADE, NOME_CIDADE,
+      USUARIO, TP_MOV, DATA_MOV
+    ) VALUES (
+      :NEW.COD_FORNECEDOR, :NEW.NOME_FORNECEDOR, :NEW.COD_CIDADE, v_nome_cidade,
+      v_usuario, v_tpmov, SYSDATE
+    );
+
   ELSIF UPDATING THEN
     v_tpmov := 'U';
+
+    OPEN c_cidade(:NEW.cod_cidade);
+    FETCH c_cidade INTO v_nome_cidade;
+    CLOSE c_cidade;
+
+    INSERT INTO LOG_FORNECEDOR (
+      COD_FORNECEDOR, NOME_FORNECEDOR, COD_CIDADE, NOME_CIDADE,
+      USUARIO, TP_MOV, DATA_MOV
+    ) VALUES (
+      :NEW.COD_FORNECEDOR, :NEW.NOME_FORNECEDOR, :NEW.COD_CIDADE, v_nome_cidade,
+      v_usuario, v_tpmov, SYSDATE
+    );
+
   ELSIF DELETING THEN
     v_tpmov := 'D';
+
+    OPEN c_cidade(:OLD.cod_cidade);
+    FETCH c_cidade INTO v_nome_cidade;
+    CLOSE c_cidade;
+
+    INSERT INTO LOG_FORNECEDOR (
+      COD_FORNECEDOR, NOME_FORNECEDOR, COD_CIDADE, NOME_CIDADE,
+      USUARIO, TP_MOV, DATA_MOV
+    ) VALUES (
+      :OLD.COD_FORNECEDOR, :OLD.NOME_FORNECEDOR, :OLD.COD_CIDADE, v_nome_cidade,
+      v_usuario, v_tpmov, SYSDATE
+    );
+
   END IF;
-
-  -- Obtém o nome da cidade
-  OPEN c_cidade;
-  FETCH c_cidade INTO v_nome_cidade;
-  CLOSE c_cidade;
-
-   -- Insere o registro no log
-  INSERT INTO LOG_FORNECEDOR (
-    COD_FORNECEDOR, NOME_FORNECEDOR, COD_CIDADE, NOME_CIDADE, USUARIO, TP_MOV, DATA_MOV
-  ) VALUES (
-    :NEW.COD_FORNECEDOR, :NEW.NOME_FORNECEDOR, :NEW.COD_CIDADE, :NEW.NOME_CIDADE, v_nome_cidade, v_usuario,
-    v_tpmov, SYSDATE
-  );
 END;
 
 --4) Para cada item_pedido inserido, atualizar o valor total do pedido. Pedido.valor_pedido := Item_pedido.Qtd * Produto.vlr_Produto
+CREATE OR REPLACE TRIGGER trg_ATUALIZA_VALOR_PEDIDO
+AFTER INSERT ON ITEM_PEDIDO
+FOR EACH ROW
+DECLARE
+  v_valor_produto   NUMBER(12,2);
+  v_valor_item      NUMBER(12,2);
+
+  -- Cursor para obter o valor unitário do produto
+  CURSOR c_valor_produto IS
+    SELECT valor_produto FROM PRODUTO WHERE cod_produto = :NEW.cod_produto;
+BEGIN
+  -- Abre o cursor para buscar o valor do produto
+  OPEN c_valor_produto;
+  FETCH c_valor_produto INTO v_valor_produto;
+  CLOSE c_valor_produto;
+
+  -- Calcula o valor do item
+  v_valor_item := :NEW.qtd_produto * v_valor_produto;
+
+  -- Atualiza o valor total do pedido somando o valor do item
+  UPDATE PEDIDO
+  SET valor_pedido = NVL(valor_pedido, 0) + v_valor_item
+  WHERE cod_pedido = :NEW.cod_pedido;
+END;

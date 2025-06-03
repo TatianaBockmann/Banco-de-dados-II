@@ -48,9 +48,42 @@ BEGIN
     END IF;
 END;
 
-UPDATE ESTOQUE
-SET QTD = '10'
-WHERE ID_PRODUTO = 1;
+INSERT INTO MOVESTOQUE (
+    ID_MOVESTOQUE, ID_ESTOQUE, ID_PRODUTO, QTD_MOV, USUARIO, TP_MOV) VALUES ( 1, 1, 1, 10, 'admin', 'E');
 
-SELCT * FROM "ESTOQUE";
+SELECT * FROM ESTOQUE;
 SELECT * FROM MOVESTOQUE;
+
+
+✅ Você deve fazer a inserção na tabela MOVESTOQUE!
+Por quê?
+Porque:
+
+O trigger trg_insercao_movestoque foi criado para atualizar automaticamente a tabela ESTOQUE após um INSERT em MOVESTOQUE, quando o tipo de movimento (TP_MOV) for 'E' (entrada).
+
+A tabela ESTOQUE já está criada com os produtos e suas quantidades iniciais zeradas (QTD = 0).
+
+✔ Exemplo de inserção correta na MOVESTOQUE
+Suponha que você quer dar entrada de 10 unidades de produto 1 (BARRACA) no estoque 1:
+
+sql
+Copiar
+Editar
+INSERT INTO MOVESTOQUE (
+    ID_MOVESTOQUE, ID_ESTOQUE, ID_PRODUTO, QTD_MOV, USUARIO, TP_MOV
+) VALUES (
+    1, 1, 1, 10, 'admin', 'E'
+);
+O que acontece:
+Esse comando insere uma movimentação de entrada (TP_MOV = 'E') de 10 unidades.
+
+O trigger trg_insercao_movestoque vai automaticamente atualizar a tabela ESTOQUE:
+
+Vai somar 10 à quantidade do produto 1 no estoque 1.
+
+Resultado final: a QTD no ESTOQUE para ID_PRODUTO = 1 será 10.
+
+❗Observações:
+O trigger só trata movimentos de entrada (TP_MOV = 'E'). Se quiser tratar saídas (TP_MOV = 'S'), precisa expandir o trigger.
+
+Certifique-se de que os IDs que está inserindo em MOVESTOQUE já existam nas tabelas relacionadas (ESTOQUE e PRODUTO), senão ocorrerá erro de chave estrangeira.

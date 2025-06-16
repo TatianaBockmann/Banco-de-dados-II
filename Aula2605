@@ -96,7 +96,8 @@ Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('6','SÃO PAULO','SP
 Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('7','MONTEVIDEO',null,'URUGUAI');
 Insert into CIDADE (COD_CIDADE,NOME_CIDADE,UF,PAIS) values ('8','CORDOBA',null,'ARGENTINA');
 -------------------------------------------------------
---  DDL for Index RPEDIDO_PK (Em resumo: O DDL cria a tabela PEDIDO e define o IDPEDIDO como a chave primária, criando um índice automático e garantindo a unicidade e integridade dos dados).
+--  DDL for Index RPEDIDO_PK (Em resumo: O DDL cria a tabela PEDIDO e define o IDPEDIDO como a chave primária, criando um índice
+automático e garantindo a unicidade e integridade dos dados).
 --------------------------------------------------------
 
   CREATE UNIQUE INDEX "RPEDIDO_PK" ON "PEDIDO" ("COD_PEDIDO") ;
@@ -199,8 +200,8 @@ CREATE TABLE "LOG_ITEM_PEDIDO"
     TP_MOV VARCHAR2(1),
     DATA_MOV DATE)  ;
 
--- 2) Criar uma trigger que grave os movimentos da item pedido na log_item_pedido. Observação: a trigger precisa ter dois cursores: 
-   --um para buscar a descrição do produto e outro cursor para buscar o valor do pedido.
+-- 2) Criar uma trigger que grave os movimentos da item pedido na log_item_pedido. Observação: a trigger precisa ter dois 
+--cursores: um para buscar a descrição do produto e outro cursor para buscar o valor do pedido.
 
 CREATE OR REPLACE TRIGGER trg_LOG_ITEM_PEDIDO
 AFTER INSERT OR UPDATE OR DELETE ON ITEM_PEDIDO

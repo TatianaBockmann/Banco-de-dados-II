@@ -59,7 +59,8 @@ SELECT * FROM MOVESTOQUE;
 Por quê?
 Porque:
 
-O trigger trg_insercao_movestoque foi criado para atualizar automaticamente a tabela ESTOQUE após um INSERT em MOVESTOQUE, quando o tipo de movimento (TP_MOV) for 'E' (entrada).
+O trigger trg_insercao_movestoque foi criado para atualizar automaticamente a tabela ESTOQUE após um INSERT em MOVESTOQUE, 
+quando o tipo de movimento (TP_MOV) for 'E' (entrada).
 
 A tabela ESTOQUE já está criada com os produtos e suas quantidades iniciais zeradas (QTD = 0).
 
@@ -86,4 +87,5 @@ Resultado final: a QTD no ESTOQUE para ID_PRODUTO = 1 será 10.
 ❗Observações:
 O trigger só trata movimentos de entrada (TP_MOV = 'E'). Se quiser tratar saídas (TP_MOV = 'S'), precisa expandir o trigger.
 
-Certifique-se de que os IDs que está inserindo em MOVESTOQUE já existam nas tabelas relacionadas (ESTOQUE e PRODUTO), senão ocorrerá erro de chave estrangeira.
+Certifique-se de que os IDs que está inserindo em MOVESTOQUE já existam nas tabelas relacionadas (ESTOQUE e PRODUTO), senão 
+ocorrerá erro de chave estrangeira.

@@ -1,0 +1,225 @@
+CREATE
+TABLE "CIDADE"
+("COD_CIDADE" NUMBER(38,0),
+"NOME_CIDADE" VARCHAR2(40 BYTE),
+"UF" VARCHAR2(2 BYTE),
+"PAIS" VARCHAR2(75 BYTE) );
+--Constraints for Table CIDADE
+
+ALTER TABLE "CIDADE" ADD PRIMARY KEY ("COD_CIDADE");
+ALTER TABLE "CIDADE" MODIFY ("PAIS" NOT NULL ENABLE);
+ALTER TABLE "CIDADE" MODIFY ("NOME_CIDADE" NOT NULL ENABLE);
+ALTER TABLE "CIDADE" MODIFY ("COD_CIDADE" NOT NULL ENABLE);      
+
+CREATE
+TABLE "PESSOA"
+("COD_PESSOA" NUMBER(10,0),
+ "COD_CIDADE" NUMBER(38,0),
+"NOME" VARCHAR2(100 BYTE),
+"RUA" VARCHAR2(100 BYTE));
+--Constraints for Table PESSOA
+
+ALTER TABLE "PESSOA" ADD PRIMARY KEY ("COD_PESSOA");
+ALTER TABLE "PESSOA" MODIFY ("RUA" NOT NULL ENABLE);
+ALTER TABLE "PESSOA" MODIFY ("NOME" NOT NULL ENABLE);
+ALTER TABLE "PESSOA" MODIFY ("COD_CIDADE" NOT NULL ENABLE);
+ALTER TABLE "PESSOA" MODIFY ("COD_PESSOA" NOT NULL ENABLE);
+
+--Ref Constraints for Table PESSOA
+ALTER
+TABLE "PESSOA" ADD FOREIGN KEY ("COD_CIDADE")
+
+ 
+    REFERENCES
+"CIDADE" ("COD_CIDADE") ENABLE;
+
+CREATE TABLE "TITULO_CONTAS_RECEBER"
+ ("NUM_TITULO" NUMBER(10,0),
+ "SERIE_TITULO" VARCHAR2(10 BYTE),
+ "COD_PESSOA" NUMBER(10,0),
+ "DATA_EMISSAO" DATE,
+  "VALOR_TITULO" NUMBER(12,2),
+  "NUMERO_PARCELAS" NUMBER(2,0),
+  "OBSERVACAO" VARCHAR2(150 BYTE));
+
+--Constraints for Table TITULO_CONTAS_RECEBER
+ALTER TABLE "TITULO_CONTAS_RECEBER" ADD PRIMARY KEY ("NUM_TITULO");
+ALTER TABLE "TITULO_CONTAS_RECEBER" MODIFY ("NUMERO_PARCELAS" NOT NULL ENABLE);
+ALTER TABLE "TITULO_CONTAS_RECEBER" MODIFY ("VALOR_TITULO" NOT NULL ENABLE);
+ALTER TABLE "TITULO_CONTAS_RECEBER" MODIFY ("DATA_EMISSAO" NOT NULL ENABLE);
+ALTER TABLE "TITULO_CONTAS_RECEBER" MODIFY ("COD_PESSOA" NOT NULL ENABLE);
+ALTER TABLE "TITULO_CONTAS_RECEBER" MODIFY ("NUM_TITULO" NOT NULL ENABLE);
+
+--Ref Constraints for Table TITULO_CONTAS_RECEBER
+ALTER TABLE "TITULO_CONTAS_RECEBER" ADD FOREIGN KEY ("COD_PESSOA")
+REFERENCES "PESSOA" ("COD_PESSOA") ENABLE;
+
+Alter table Titulo_Contas_Receber Add valor_pago number(12,2);
+
+CREATE TABLE "HISTORICO_CONTAS_RECEBER"
+("NUM_TITULO" NUMBER(10,0),
+"SEQ_HISTORICO" NUMBER(3,0),
+"DATA_MOVIMENTO" DATE,
+"DATA_PAGAMENTO" DATE,
+"VALOR_PAGO" NUMBER(17,0),
+"OBSERVACAO" VARCHAR2(100 BYTE));
+
+ALTER TABLE "HISTORICO_CONTAS_RECEBER" ADD CONSTRAINT "HISTORICO_CONTAS_RECEBER_PK" PRIMARY KEY ("NUM_TITULO", "SEQ_HISTORICO");
+ALTER TABLE "HISTORICO_CONTAS_RECEBER" MODIFY ("DATA_MOVIMENTO" NOT NULL ENABLE);
+ALTER TABLE "HISTORICO_CONTAS_RECEBER" MODIFY ("SEQ_HISTORICO" NOT NULL ENABLE);
+ALTER TABLE "HISTORICO_CONTAS_RECEBER" MODIFY ("NUM_TITULO" NOT NULL ENABLE);
+
+create table Informacao 
+(dataInfo date,
+info varchar2(200));
+
+
+
+
+
+ 
+ALTER
+TABLE "HISTORICO_CONTAS_RECEBER" ADD CONSTRAINT
+"HIST_CRC_TIT_CRC_FK" FOREIGN KEY ("NUM_TITULO")
+
+ 
+    REFERENCES
+"TITULO_CONTAS_RECEBER" ("NUM_TITULO") ENABLE;
+ Na tabela TITULO_CONTAS_RECEBER, na inclusão e na alteração ,   a trigger deve restringir  : valor do titulo menor que 0 e o nº parcelas deve estar entre 1 e 10 (inclusive).
+      nesse tipo de modelo
+
+O ChatGPT disse:
+Para implementar essa lógica de validação (restrição do valor do título e número de parcelas) na tabela TITULO_CONTAS_RECEBER, você pode criar uma trigger BEFORE INSERT OR UPDATE que verificará se os valores atendem às regras:
+
+✅ Regras a implementar:
+VALOR_TITULO não pode ser menor que 0
+
+NUMERO_PARCELAS deve estar entre 1 e 10 (inclusive)
+
+🔧 Código da Trigger:
+sql
+Copiar
+Editar
+CREATE OR REPLACE TRIGGER TRG_VALIDA_TITULO_CRC
+BEFORE INSERT OR UPDATE ON TITULO_CONTAS_RECEBER
+FOR EACH ROW
+BEGIN
+    IF :NEW.VALOR_TITULO < 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'O valor do título não pode ser menor que zero.');
+    END IF;
+
+    IF :NEW.NUMERO_PARCELAS < 1 OR :NEW.NUMERO_PARCELAS > 10 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'O número de parcelas deve estar entre 1 e 10.');
+    END IF;
+END;
+/
+📌 Observações:
+Essa trigger será executada automaticamente sempre que houver um INSERT ou UPDATE na tabela TITULO_CONTAS_RECEBER.
+
+O RAISE_APPLICATION_ERROR gera um erro e impede a operação, garantindo que as regras sejam cumpridas.
+
+Os códigos de erro personalizados (-20001, -20002) devem estar entre -20000 e -20999, que são permitidos para aplicações no Oracle.
+
+Se quiser ajuda com mais validações ou implementar triggers similares em outras tabelas, posso ajudar com isso também.
+
+
+
+Você disse:
+Toda ação DML na tabela cidade deve gerar uma cópia na tebela info (cod_cidade, nome, uf, pais).
+
+O ChatGPT disse:
+Para registrar toda ação DML (INSERT, UPDATE ou DELETE) na tabela CIDADE e gravar os dados modificados na tabela INFORMACAO, você precisa:
+
+Alterar a tabela INFORMACAO para incluir as colunas necessárias (COD_CIDADE, NOME_CIDADE, UF, PAIS e talvez a operação).
+
+Criar uma trigger AFTER INSERT OR UPDATE OR DELETE na tabela CIDADE para copiar os dados.
+
+✅ 1. Alteração da tabela INFORMACAO:
+Vamos adicionar os campos para armazenar os dados da CIDADE:
+
+sql
+Copiar
+Editar
+DROP TABLE INFORMACAO;
+
+CREATE TABLE INFORMACAO (
+    DATAINFO     DATE,
+    OPERACAO     VARCHAR2(10),
+    COD_CIDADE   NUMBER(38,0),
+    NOME_CIDADE  VARCHAR2(40 BYTE),
+    UF           VARCHAR2(2 BYTE),
+    PAIS         VARCHAR2(75 BYTE)
+);
+✅ 2. Trigger para gravar as ações da tabela CIDADE:
+sql
+Copiar
+Editar
+CREATE OR REPLACE TRIGGER TRG_LOG_CIDADE
+AFTER INSERT OR UPDATE OR DELETE ON CIDADE
+FOR EACH ROW
+DECLARE
+    v_operacao VARCHAR2(10);
+BEGIN
+    IF INSERTING THEN
+        v_operacao := 'INSERT';
+        INSERT INTO INFORMACAO (DATAINFO, OPERACAO, COD_CIDADE, NOME_CIDADE, UF, PAIS)
+        VALUES (SYSDATE, v_operacao, :NEW.COD_CIDADE, :NEW.NOME_CIDADE, :NEW.UF, :NEW.PAIS);
+
+    ELSIF UPDATING THEN
+        v_operacao := 'UPDATE';
+        INSERT INTO INFORMACAO (DATAINFO, OPERACAO, COD_CIDADE, NOME_CIDADE, UF, PAIS)
+        VALUES (SYSDATE, v_operacao, :NEW.COD_CIDADE, :NEW.NOME_CIDADE, :NEW.UF, :NEW.PAIS);
+
+    ELSIF DELETING THEN
+        v_operacao := 'DELETE';
+        INSERT INTO INFORMACAO (DATAINFO, OPERACAO, COD_CIDADE, NOME_CIDADE, UF, PAIS)
+        VALUES (SYSDATE, v_operacao, :OLD.COD_CIDADE, :OLD.NOME_CIDADE, :OLD.UF, :OLD.PAIS);
+    END IF;
+END;
+/
+📝 Resultado:
+Com isso, qualquer inserção, atualização ou exclusão na tabela CIDADE será logada automaticamente na tabela INFORMACAO com a data/hora e o tipo de operação.
+
+Se quiser também incluir o usuário (USER) ou terminal, posso ajudar a estender a trigger para isso.
+
+
+
+Você disse:
+3. Construa uma view mostrando o nome da pessoa, o nome da cidade, o número do título, a data de emissão do título e o valor do título.
+
+O ChatGPT disse:
+Para criar uma view que mostre:
+
+Nome da pessoa (PESSOA.NOME)
+
+Nome da cidade (CIDADE.NOME_CIDADE)
+
+Número do título (TITULO_CONTAS_RECEBER.NUM_TITULO)
+
+Data de emissão (TITULO_CONTAS_RECEBER.DATA_EMISSAO)
+
+Valor do título (TITULO_CONTAS_RECEBER.VALOR_TITULO)
+
+Você pode usar JOINs entre as tabelas TITULO_CONTAS_RECEBER, PESSOA e CIDADE.
+
+✅ SQL para a VIEW:
+sql
+Copiar
+Editar
+CREATE OR REPLACE VIEW VW_PESSOA_TITULO_CIDADE AS
+SELECT
+    P.NOME AS NOME_PESSOA,
+    C.NOME_CIDADE,
+    T.NUM_TITULO,
+    T.DATA_EMISSAO,
+    T.VALOR_TITULO
+FROM
+    TITULO_CONTAS_RECEBER T
+    JOIN PESSOA P ON T.COD_PESSOA = P.COD_PESSOA
+    JOIN CIDADE C ON P.COD_CIDADE = C.COD_CIDADE;
+🔍 Exemplo de uso:
+sql
+Copiar
+Editar
+SELECT * FROM VW_PESSOA_TITULO_CIDADE;
+Se quiser incluir mais colunas, aplicar filtros (por exemplo, títulos com valor > 1000), ou formatar datas/valores, posso ajustar a view conforme necessário.

@@ -1,0 +1,177 @@
+Create table EstadoCivil
+(IdEstadoCivil Number(7),
+Descricao_EstadoCivil Varchar2(100),
+Constraint EstadoCivil_PK   
+Primary key(IdEstadoCivil));
+
+insert into EstadoCivil values(1,'Solteiro');
+insert into EstadoCivil values(2,'Casado');
+insert into EstadoCivil values(3,'Viúvo');
+insert into EstadoCivil values(4,'Solteiro');
+
+Create table TipoPessoa
+(IdTipoPessoa Number(7),
+Descricao_TipoPessoa Varchar2(100),
+Constraint TipoPessoa_PK   
+Primary key(IdTipoPessoa));
+
+insert into TipoPessoa values(1,'Física');
+insert into TipoPessoa values(2,'Jurídica');
+insert into TipoPessoa values(3,'Jurídica');
+insert into TipoPessoa values(4,'Física');
+
+Create table Pessoa
+(IdPessoa Number(7),
+    NomePessoa VARCHAR(150),
+	IdEstadoCivil Number(7),
+    IdTipoPessoa Number(7),
+	Constraint PESSOA_PK
+ Primary key(idPessoa),
+ Constraint Pessoa_EstadoCivil_FK Foreign key(IdEstadoCivil) references EstadoCivil(IdEstadoCivil),
+ Constraint Pessoa_TipoPessoa_FK Foreign key(IdTipoPessoa) references TipoPessoa(IdTipoPessoa));  
+    
+insert into Pessoa values(1,'Maria', 4, 1);
+insert into Pessoa values(2,'João', 3, 2);
+insert into Pessoa values(3,'Roisalina', 1, 4);
+insert into Pessoa values(4,'Joel', 2, 3);
+
+Create Table logPessoa
+(IdPessoa Number(7),
+    NomePessoa VARCHAR(150),
+	IdEstadoCivil Number(7),
+    Descricao_EstadoCivil Varchar2(100),
+    IdTipoPessoa Number(7),
+    Descricao_TipoPessoa Varchar2(100),
+    usuario varchar2(30),
+    tpmov  varchar2(1),
+    datamov date);
+
+CREATE OR REPLACE TRIGGER trg_LOG_PESSOA
+AFTER INSERT OR UPDATE OR DELETE ON Pessoa
+FOR EACH ROW
+DECLARE
+    v_usuario VARCHAR2(30); -- Defina como quiser obter o usuário (pode ser uma variável ou função)
+    v_estado_civil VARCHAR2(100);
+    v_tipo_pessoa VARCHAR2(100);
+BEGIN
+    -- Aqui, você pode definir a forma de obter o usuário, por exemplo, de uma variável de sessão
+
+    v_usuario := USER; -- Exemplo se você usar o usuário da sessão.
+
+    -- Obter descrição do Estado Civil
+    SELECT Descricao_EstadoCivil INTO v_estado_civil
+    FROM EstadoCivil
+    WHERE IdEstadoCivil = :NEW.IdEstadoCivil;
+
+    -- Obter descrição do Tipo de Pessoa
+    SELECT Descricao_TipoPessoa INTO v_tipo_pessoa
+    FROM TipoPessoa
+    WHERE IdTipoPessoa = :NEW.IdTipoPessoa;
+
+    -- Registro de log
+    IF INSERTING THEN
+        INSERT INTO logPessoa (IdPessoa, NomePessoa, IdEstadoCivil, Descricao_EstadoCivil,
+                                IdTipoPessoa, Descricao_TipoPessoa, usuario, tpmov, datamov)
+        VALUES (:NEW.IdPessoa, :NEW.NomePessoa, :NEW.IdEstadoCivil, v_estado_civil,
+                :NEW.IdTipoPessoa, v_tipo_pessoa, v_usuario, 'I', SYSDATE);
+
+    ELSIF UPDATING THEN
+        INSERT INTO logPessoa (IdPessoa, NomePessoa, IdEstadoCivil, Descricao_EstadoCivil,
+                                IdTipoPessoa, Descricao_TipoPessoa, usuario, tpmov, datamov)
+        VALUES (:NEW.IdPessoa, :NEW.NomePessoa, :NEW.IdEstadoCivil, v_estado_civil,
+                :NEW.IdTipoPessoa, v_tipo_pessoa, v_usuario, 'U', SYSDATE);
+
+    ELSIF DELETING THEN
+        INSERT INTO logPessoa (IdPessoa, NomePessoa, IdEstadoCivil, Descricao_EstadoCivil,
+                                IdTipoPessoa, Descricao_TipoPessoa, usuario, tpmov, datamov)
+        VALUES (:OLD.IdPessoa, :OLD.NomePessoa, :OLD.IdEstadoCivil, v_estado_civil,
+                :OLD.IdTipoPessoa, v_tipo_pessoa, v_usuario, 'D', SYSDATE);
+    END IF;
+END;
+/
+CREATE OR REPLACE TRIGGER trg_LOG_PESSOA
+AFTER INSERT OR UPDATE OR DELETE ON PESSOA
+FOR EACH ROW
+DECLARE
+  v_usuario                VARCHAR2(100);
+  v_descricao_estadocivil  VARCHAR2(100);
+  v_descricao_tipopessoa    VARCHAR2(100);
+  v_tp_mov                 VARCHAR2(1);
+
+  CURSOR c_estadocivil(p_idestadocivil NUMBER) IS
+    SELECT descricao_estadocivil FROM estadocivil WHERE idestadocivil = p_idestadocivil;
+
+  CURSOR c_tipopessoa(p_idtipopessoa NUMBER) IS
+    SELECT descricao_tipopessoa FROM tipopessoa WHERE idtipopessoa = p_idtipopessoa;
+
+BEGIN
+  -- Descobre o usuário
+  SELECT USER INTO v_usuario FROM dual;
+
+  -- Define tipo de movimentação
+  IF INSERTING THEN
+    v_tp_mov := 'I';
+    INSERT INTO logPessoa (
+      IdPessoa, NomePessoa, IdEstadoCivil, Descricao_EstadoCivil, IdTipoPessoa, Descricao_TipoPessoa, usuario, tpmov, datamov
+    ) VALUES (
+      :NEW.IdPessoa, 
+      :NEW.NomePessoa,
+      :NEW.IdEstadoCivil,
+      (SELECT descricao_estadocivil FROM estadocivil WHERE idestadocivil = :NEW.idestadocivil), 
+      :NEW.IdTipoPessoa,
+      (SELECT descricao_tipopessoa FROM tipopessoa WHERE idtipopessoa = :NEW.idtipopessoa), 
+      v_usuario, 
+      v_tp_mov, 
+      SYSDATE
+    );
+
+  ELSIF UPDATING THEN
+    v_tp_mov := 'U';
+    INSERT INTO logPessoa (
+      IdPessoa, NomePessoa, IdEstadoCivil, Descricao_EstadoCivil, IdTipoPessoa, Descricao_TipoPessoa, usuario, tpmov, datamov
+    ) VALUES (
+      :NEW.IdPessoa, 
+      :NEW.NomePessoa,
+      :NEW.IdEstadoCivil,
+      (SELECT descricao_estadocivil FROM estadocivil WHERE idestadocivil = :NEW.idestadocivil), 
+      :NEW.IdTipoPessoa,
+      (SELECT descricao_tipopessoa FROM tipopessoa WHERE idtipopessoa = :NEW.idtipopessoa), 
+      v_usuario, 
+      v_tp_mov, 
+      SYSDATE
+    );
+
+  ELSIF DELETING THEN
+    v_tp_mov := 'D';
+    INSERT INTO logPessoa (
+      IdPessoa, NomePessoa, IdEstadoCivil, Descricao_EstadoCivil, IdTipoPessoa, Descricao_TipoPessoa, usuario, tpmov, datamov
+    ) VALUES (
+      :OLD.IdPessoa, 
+      :OLD.NomePessoa,
+      :OLD.IdEstadoCivil,
+      (SELECT descricao_estadocivil FROM estadocivil WHERE idestadocivil = :OLD.idestadocivil), 
+      :OLD.IdTipoPessoa,
+      (SELECT descricao_tipopessoa FROM tipopessoa WHERE idtipopessoa = :OLD.idtipopessoa), 
+      v_usuario, 
+      v_tp_mov, 
+      SYSDATE
+    );
+  END IF;
+END;
+
+SELECT * FROM LOG_PESSOA;
+SELECT * FROM LOG_PESSOA;
+INSERT INTO PESSOA (
+    insert into Pessoa values(5,'Joelma', 2, 3);
+
+
+UPDATE PESSOA
+SET NOMEPESSOA = 'JÚLIA'
+WHERE IDPESSOA = 5;
+
+DELETE FROM PESSOA
+WHERE COD_PEDIDO = 5;
+
+--UPDATE PEDIDO
+--SET VALOR_PEDIDO = 160
+--WHERE COD_PEDIDO = 3;
